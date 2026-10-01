@@ -7,13 +7,14 @@ struct RootView: View {
     @State private var pairingSheet = false
     @State private var selectedTab: DeskTab = .capture
     @State private var importedCode = ""
+    @State private var captureEditing = false
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab("记录", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
                 NavigationStack { HistoryView() }
             }
             Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
-                NavigationStack { CaptureView(showPairing: $pairingSheet) }
+                NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
             }
             Tab("桌面", systemImage: "desktopcomputer", value: DeskTab.desktop) {
                 NavigationStack { DesktopView(showPairing: $pairingSheet) }
@@ -46,137 +47,94 @@ struct DeskBackdrop: View {
 struct CaptureView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
+    @Binding var isEditing: Bool
     @FocusState private var editing: Bool
     var body: some View {
-        ScrollViewReader { scroll in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    if store.code == nil || store.needsPairing { pairingPrompt }
-                    ForEach(recentRecords) { record in captureBubble(record) }
-                    Color.clear.frame(height: 1).id("latest")
-                }.padding(.horizontal, 20).padding(.vertical, 16)
+        @Bindable var store = store
+        VStack(spacing: 0) {
+            Picker("发送类型", selection: $store.kind) {
+                ForEach(CaptureKind.allCases, id: \.self) { kind in
+                    Label(kind.title, systemImage: kind.symbol).tag(kind)
+                }
+            }.pickerStyle(.segmented).disabled(store.busy)
+                .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
+            if store.code == nil || store.needsPairing {
+                Button {
+                    editing = false
+                    showPairing = true
+                } label: {
+                    Label(store.needsPairing ? "重新配对桌面" : "连接我的桌面", systemImage: "link")
+                }.buttonStyle(.glass).disabled(store.busy).padding(.bottom, 12)
             }
-            .defaultScrollAnchor(.bottom)
-            .scrollDismissesKeyboard(.interactively)
-            .onChange(of: recentRecords.last?.id) { _, _ in
-                withAnimation(.easeOut(duration: 0.2)) { scroll.scrollTo("latest", anchor: .bottom) }
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $store.draft)
+                    .font(.body).scrollContentBackground(.hidden)
+                    .scrollDismissesKeyboard(.interactively)
+                    .scrollBounceBehavior(.always)
+                    .focused($editing).disabled(store.busy)
+                    .accessibilityLabel("速记内容")
+                    .padding(.horizontal, 20)
+                if store.draft.isEmpty {
+                    Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
+                        .font(.body).foregroundStyle(.tertiary)
+                        .padding(.horizontal, 25).padding(.top, 8)
+                        .allowsHitTesting(false)
+                }
             }
-            .onChange(of: editing) { _, focused in
-                if focused { withAnimation(.easeOut(duration: 0.2)) { scroll.scrollTo("latest", anchor: .bottom) } }
-            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .simultaneousGesture(TapGesture().onEnded { if !store.busy { editing = true } })
         }
         .background { DeskBackdrop() }
-        .safeAreaInset(edge: .bottom, spacing: 0) { composer }
+        .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
         .navigationTitle("Mini Desk").navigationBarTitleDisplayMode(.inline)
+        .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showPairing = true } label: { Image(systemName: store.code == nil ? "link.badge.plus" : "link") }
-                    .disabled(store.busy).accessibilityLabel("桌面配对")
+                Button { editing = false; showPairing = true } label: {
+                    Image(systemName: store.code == nil ? "link.badge.plus" : "link")
+                }.disabled(store.busy).accessibilityLabel("桌面配对")
             }
         }
+        .onChange(of: editing) { _, focused in
+            withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
+        }
+        .onDisappear { editing = false; isEditing = false }
     }
-    private var pairingPrompt: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("先记下来。\n回到桌面再继续。")
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
-            Button { showPairing = true } label: {
-                Label(store.needsPairing ? "重新配对桌面" : "连接我的桌面", systemImage: "link")
-                    .frame(maxWidth: .infinity).padding(.vertical, 8)
-            }.buttonStyle(.glassProminent).controlSize(.large)
-            Text("在桌面 Mini Desk 的工作区菜单中打开「手机速记」，扫码或输入配对码。")
-                .font(.subheadline).foregroundStyle(.secondary)
-        }.padding(.vertical, 16)
-    }
-    private var composer: some View {
-        @Bindable var store = store
-        return VStack(spacing: 12) {
+    private var editingTools: some View {
+        VStack(alignment: .leading, spacing: 12) {
             if let error = store.error {
                 Label(error, systemImage: "exclamationmark.circle")
-                    .font(.caption).foregroundStyle(.red).frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.caption).foregroundStyle(.red)
             }
             GlassEffectContainer(spacing: 12) {
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        Picker("发送类型", selection: $store.kind) {
-                            ForEach(CaptureKind.allCases, id: \.self) { kind in
-                                Label(kind.title, systemImage: kind.symbol).tag(kind)
-                            }
-                        }.pickerStyle(.segmented).disabled(store.busy)
-                        Button { store.polish.toggle() } label: { Label("AI", systemImage: "sparkles") }
-                            .buttonStyle(.glass).tint(store.polish ? Color.accentColor : Color.secondary)
-                            .disabled(store.busy).accessibilityLabel("AI 整理")
-                            .accessibilityValue(store.polish ? "已开启" : "已关闭")
+                HStack(spacing: 12) {
+                    PasteButton(payloadType: String.self) { values in
+                        guard let text = values.first else { return }
+                        store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
+                    }.labelStyle(.iconOnly).disabled(store.busy).accessibilityLabel("粘贴内容")
+                    Button("清空") { store.draft = "" }
+                        .buttonStyle(.glass).disabled(store.draft.isEmpty || store.busy)
+                    Button { store.polish.toggle() } label: { Image(systemName: "sparkles") }
+                        .buttonStyle(.glass).tint(store.polish ? Color.accentColor : Color.secondary)
+                        .disabled(store.busy).accessibilityLabel("AI 整理")
+                        .accessibilityValue(store.polish ? "已开启" : "已关闭")
+                    Spacer(minLength: 8)
+                    Button(action: sendDraft) {
+                        ZStack {
+                            Image(systemName: "arrow.up").font(.title3.weight(.semibold))
+                                .opacity(store.busy ? 0 : 1)
+                            ProgressView().tint(.white).opacity(store.busy ? 1 : 0)
+                        }.frame(width: 28, height: 28)
                     }
-                    HStack(alignment: .bottom, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            TextField(store.kind == .todo ? "写一条提醒…" : "记下此刻的想法…", text: $store.draft, axis: .vertical)
-                                .lineLimit(1...6).focused($editing)
-                                .disabled(store.busy).accessibilityLabel("速记内容")
-                            HStack(spacing: 14) {
-                                PasteButton(payloadType: String.self) { values in
-                                    guard let text = values.first else { return }
-                                    store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
-                                }.labelStyle(.iconOnly).controlSize(.mini).disabled(store.busy)
-                                    .accessibilityLabel("粘贴内容")
-                                Button("清空") { store.draft = "" }
-                                    .font(.caption).buttonStyle(.plain).foregroundStyle(.secondary)
-                                    .disabled(store.draft.isEmpty || store.busy)
-                                Spacer(minLength: 0)
-                                if !store.draft.isEmpty {
-                                    Text("每行一条").font(.caption2).foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                        .padding(16)
-                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26))
-                        Button(action: sendDraft) {
-                            ZStack {
-                                Image(systemName: "arrow.up").font(.title3.weight(.semibold))
-                                    .opacity(store.busy ? 0 : 1)
-                                ProgressView().tint(.white).opacity(store.busy ? 1 : 0)
-                            }.frame(width: 28, height: 28)
-                        }
-                        .buttonStyle(.glassProminent).buttonBorderShape(.circle).controlSize(.large)
-                        // Eligibility affects interaction rather than replacing the glass material.
-                        .allowsHitTesting(canSend).opacity(canSend || store.busy ? 1 : 0.4)
-                        .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
-                        .accessibilityHint(canSend ? "收起键盘并发送当前内容" : "配对桌面并输入内容后可发送")
-                        .transaction { $0.animation = nil }
-                    }
+                    .buttonStyle(.glassProminent).buttonBorderShape(.circle).controlSize(.large)
+                    .allowsHitTesting(canSend).opacity(canSend || store.busy ? 1 : 0.4)
+                    .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
+                    .accessibilityHint("收起键盘并发送当前内容")
+                    .transaction { $0.animation = nil }
                 }
             }
-        }.padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 12)
-    }
-    private var recentRecords: [Delivery] {
-        guard let code = store.code else { return [] }
-        let hash = Pairing.hash(code)
-        return Array(store.records.filter { $0.hash == hash }.prefix(20).reversed())
-    }
-    private func captureBubble(_ record: Delivery) -> some View {
-        HStack {
-            Spacer(minLength: 40)
-            VStack(alignment: .leading, spacing: 10) {
-                Label(record.payload.kind.title, systemImage: record.payload.kind.symbol)
-                    .font(.caption).foregroundStyle(.secondary)
-                Text(record.payload.text).textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                HStack {
-                    Text(record.date, format: .dateTime.hour().minute().locale(Locale(identifier: "zh_CN")))
-                        .font(.caption2).foregroundStyle(.secondary)
-                    Spacer()
-                    if record.accepted {
-                        Image(systemName: "checkmark").font(.caption).foregroundStyle(.secondary)
-                            .accessibilityLabel("中转已接收，等待桌面同步")
-                    } else if store.busy && record.error == nil {
-                        ProgressView().controlSize(.mini)
-                    } else if store.canRetry(record) {
-                        Button("重试", systemImage: "arrow.clockwise") { Task { await store.retry(record.id) } }
-                            .font(.caption).disabled(store.busy)
-                    }
-                }
-            }.padding(16)
-                .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 22))
-        }
+        }.padding(.horizontal, 20).padding(.vertical, 12)
     }
     private var canSend: Bool {
         !store.busy && store.code != nil && !store.needsPairing &&

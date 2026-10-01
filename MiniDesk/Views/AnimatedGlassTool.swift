@@ -23,9 +23,8 @@ struct AnimatedGlassTool<Content: View>: View {
                 content
                     .fixedSize()
                     .frame(width: 52, height: 48, alignment: .center)
-                    // Transform the label and system glass as one composited layer.
+                    // Fade the label and system glass together without changing their geometry.
                     .compositingGroup()
-                    .scaleEffect(presented || reduceMotion ? 1 : 0, anchor: .center)
                     .opacity(presented ? 1 : 0)
                     .allowsHitTesting(visible)
                     .accessibilityHidden(!visible)

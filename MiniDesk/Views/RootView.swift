@@ -191,7 +191,7 @@ struct CaptureView: View {
     }
     private func toolSurface<Content: View>(tinted: Bool = false, @ViewBuilder content: () -> Content) -> some View {
         content().font(.system(size: 17, weight: .medium))
-            .frame(width: 52, height: 38)
+            .frame(width: 58, height: 44)
             .foregroundStyle(tinted ? Color.white : Color.primary)
             .glassEffect(tinted ? .regular.tint(Color.accentColor).interactive() : .regular.interactive(),
                          in: Capsule())

@@ -20,7 +20,7 @@ struct RootView: View {
                 NavigationStack { DesktopView(showPairing: $pairingSheet) }
             }
         }
-        .sensoryFeedback(.selection, trigger: selectedTab)
+        .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: selectedTab)
         .sheet(isPresented: $pairingSheet, onDismiss: { importedCode = "" }) { PairingView() }
         .onOpenURL { url in
             let code = Pairing.normalize(url.absoluteString)
@@ -57,7 +57,7 @@ struct CaptureView: View {
                     Label(kind.title, systemImage: kind.symbol).tag(kind)
                 }
             }.pickerStyle(.segmented).disabled(store.busy)
-                .sensoryFeedback(.selection, trigger: store.kind)
+                .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.kind)
                 .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
             if store.code == nil || store.needsPairing {
                 Button {
@@ -92,10 +92,10 @@ struct CaptureView: View {
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { editing = false; showPairing = true } label: {
-                    Image(systemName: store.code == nil ? "link.badge.plus" : "link")
-                }.disabled(store.busy).accessibilityLabel("桌面配对")
-            }
+                Toggle("AI润色", isOn: $store.polish)
+                    .toggleStyle(.switch).font(.subheadline).fixedSize()
+                    .disabled(store.busy).accessibilityLabel("AI 润色")
+            }.sharedBackgroundVisibility(.hidden)
         }
         .onChange(of: editing) { _, focused in
             withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
@@ -103,8 +103,7 @@ struct CaptureView: View {
         .onDisappear { editing = false; isEditing = false }
     }
     private var editingTools: some View {
-        @Bindable var store = store
-        return VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
             if let error = store.error {
                 Label(error, systemImage: "exclamationmark.circle")
                     .font(.caption).foregroundStyle(.red)
@@ -117,21 +116,17 @@ struct CaptureView: View {
                             .glassEffect(.regular.interactive(), in: Capsule())
                     }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
                         .disabled(store.draft.isEmpty || store.busy)
-                    Toggle("AI", isOn: $store.polish)
-                        .toggleStyle(.switch).font(.subheadline).fixedSize()
-                        .frame(height: 44).disabled(store.busy)
-                        .accessibilityLabel("AI 润色")
                     Spacer(minLength: 8)
                     // Keep the existing system-authorized clipboard paste control.
-                    PasteButton(payloadType: String.self) { values in
-                        guard let text = values.first else { return }
+                    ClipboardPasteButton(enabled: !store.busy) { text in
+                        guard !store.busy else { return }
                         store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
-                    }.labelStyle(.iconOnly).controlSize(.small).buttonStyle(.glass)
-                        .frame(width: 44, height: 44).disabled(store.busy)
-                        .accessibilityLabel("粘贴内容")
+                    }.frame(width: 32, height: 32)
+                        .glassEffect(.regular.interactive(), in: Circle())
+                        .frame(width: 44, height: 44)
                     Button(action: sendDraft) {
                         ZStack {
-                            Image(systemName: "arrow.up").font(.system(size: 16, weight: .semibold))
+                            Image(systemName: "paperplane.fill").font(.system(size: 16, weight: .semibold))
                                 .opacity(store.busy ? 0 : 1)
                             ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
                         }.frame(width: 32, height: 32)
@@ -143,7 +138,17 @@ struct CaptureView: View {
                     .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
                     .accessibilityHint("收起键盘并发送当前内容")
                     .transaction { $0.animation = nil }
-
+                }
+                .overlay(alignment: .center) {
+                    if editing {
+                        Button { editing = false } label: {
+                            Image(systemName: "keyboard.chevron.compact.down")
+                                .font(.system(size: 16, weight: .medium))
+                                .frame(width: 44, height: 32)
+                                .glassEffect(.regular.interactive(), in: Capsule())
+                        }.buttonStyle(.plain).frame(width: 52, height: 44)
+                            .contentShape(Rectangle()).accessibilityLabel("收起键盘")
+                    }
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 12)

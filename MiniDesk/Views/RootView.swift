@@ -40,7 +40,7 @@ extension EnvironmentValues {
 
 struct DeskBackdrop: View {
     var body: some View {
-        LinearGradient(colors: [Color.green.opacity(0.09), Color(uiColor: .systemGroupedBackground), Color.orange.opacity(0.07)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
+        LinearGradient(colors: [Color.accentColor.opacity(0.09), Color(uiColor: .systemGroupedBackground), Color.blue.opacity(0.04)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea()
     }
 }
 
@@ -136,20 +136,20 @@ struct CaptureView: View {
                                 Button { store.draft = "" } label: {
                                     toolSurface { Text("清空") }
                                 }.buttonStyle(.plain).disabled(store.busy)
-                                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.94)))
+                                    .transition(toolTransition)
                             }
                         }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
+                            .animation(toolAnimation, value: store.draft.isEmpty)
                         Spacer(minLength: 8)
                         ZStack {
                             if hasClipboardText {
                                 Button(action: pasteDraft) {
                                     toolSurface { Image(systemName: "doc.on.clipboard") }
                                 }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel("粘贴文本")
-                                    .transition(.opacity)
+                                    .transition(toolTransition)
                             }
                         }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: hasClipboardText)
+                            .animation(toolAnimation, value: hasClipboardText)
                         ZStack {
                             if !store.draft.isEmpty {
                                 Button(action: sendDraft) {
@@ -163,10 +163,10 @@ struct CaptureView: View {
                                     .opacity(canSend || store.busy ? 1 : 0.4)
                                     .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
                                     .accessibilityHint("收起键盘并发送当前内容")
-                                    .transition(.opacity)
+                                    .transition(toolTransition)
                             }
                         }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
+                            .animation(toolAnimation, value: store.draft.isEmpty)
 
                     }
                     .overlay(alignment: .center) {
@@ -175,11 +175,19 @@ struct CaptureView: View {
                                 toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
                             }.buttonStyle(.plain).frame(width: 52, height: 44).contentShape(Rectangle())
                                 .accessibilityLabel("收起键盘")
+                                .transition(toolTransition)
                         }
                     }
+                    .animation(toolAnimation, value: editing)
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 8)
+    }
+    private var toolTransition: AnyTransition {
+        reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.65, anchor: .center))
+    }
+    private var toolAnimation: Animation {
+        reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)
     }
     private func toolSurface<Content: View>(tinted: Bool = false, @ViewBuilder content: () -> Content) -> some View {
         content().font(.system(size: 16, weight: .medium))

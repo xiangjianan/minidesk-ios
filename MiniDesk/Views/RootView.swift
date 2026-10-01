@@ -49,6 +49,9 @@ struct CaptureView: View {
     @Binding var showPairing: Bool
     @Binding var isEditing: Bool
     @FocusState private var editing: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var hasClipboardText = false
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
@@ -92,66 +95,115 @@ struct CaptureView: View {
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Toggle("AI润色", isOn: $store.polish)
-                    .toggleStyle(.switch).font(.subheadline).fixedSize()
-                    .disabled(store.busy).accessibilityLabel("AI 润色")
-            }.sharedBackgroundVisibility(.hidden)
+                Button { store.polish.toggle() } label: {
+                    Label("AI润色", systemImage: store.polish ? "checkmark" : "sparkles")
+                        .font(.subheadline)
+                }
+                .tint(store.polish ? Color.accentColor : Color.secondary)
+                .disabled(store.busy).accessibilityLabel("AI 润色")
+                .accessibilityValue(store.polish ? "已开启" : "已关闭")
+                .accessibilityAddTraits(store.polish ? [.isSelected] : [])
+            }
         }
         .onChange(of: editing) { _, focused in
             withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
         }
+        .onAppear(perform: refreshClipboardAvailability)
+        .onReceive(NotificationCenter.default.publisher(for: UIPasteboard.changedNotification)) { _ in
+            refreshClipboardAvailability()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { refreshClipboardAvailability() }
+        }
         .onDisappear { editing = false; isEditing = false }
     }
     private var editingTools: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             if let error = store.error {
                 Label(error, systemImage: "exclamationmark.circle")
                     .font(.caption).foregroundStyle(.red)
             }
-            GlassEffectContainer(spacing: 12) {
-                HStack(spacing: 12) {
-                    Button { store.draft = "" } label: {
-                        Text("清空").font(.subheadline)
-                            .frame(width: 52, height: 32)
-                            .glassEffect(.regular.interactive(), in: Capsule())
-                    }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
-                        .disabled(store.draft.isEmpty || store.busy)
-                    Spacer(minLength: 8)
-                    // Keep the existing system-authorized clipboard paste control.
-                    ClipboardPasteButton(enabled: !store.busy) { text in
-                        guard !store.busy else { return }
-                        store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
-                    }.frame(width: 32, height: 32)
-                        .glassEffect(.regular.interactive(), in: Circle())
-                        .frame(width: 44, height: 44)
-                    Button(action: sendDraft) {
-                        ZStack {
-                            Image(systemName: "paperplane.fill").font(.system(size: 16, weight: .semibold))
-                                .opacity(store.busy ? 0 : 1)
-                            ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
-                        }.frame(width: 32, height: 32)
-                            .foregroundStyle(.white)
-                            .glassEffect(.regular.tint(Color.accentColor).interactive(), in: Circle())
-                    }
-                    .buttonStyle(.plain).frame(width: 44, height: 44).contentShape(Rectangle())
-                    .allowsHitTesting(canSend).opacity(canSend || store.busy ? 1 : 0.4)
-                    .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
-                    .accessibilityHint("收起键盘并发送当前内容")
-                    .transaction { $0.animation = nil }
-                }
-                .overlay(alignment: .center) {
+            GlassEffectContainer(spacing: 8) {
+                VStack(spacing: 0) {
                     if editing {
                         Button { editing = false } label: {
-                            Image(systemName: "keyboard.chevron.compact.down")
-                                .font(.system(size: 16, weight: .medium))
-                                .frame(width: 44, height: 32)
-                                .glassEffect(.regular.interactive(), in: Capsule())
-                        }.buttonStyle(.plain).frame(width: 52, height: 44)
-                            .contentShape(Rectangle()).accessibilityLabel("收起键盘")
+                            toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
+                        }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
+                            .accessibilityLabel("收起键盘")
+                            .frame(maxWidth: .infinity)
                     }
+                    HStack(spacing: 8) {
+                        ZStack {
+                            if !store.draft.isEmpty {
+                                Button { store.draft = "" } label: {
+                                    toolSurface { Text("清空") }
+                                }.buttonStyle(.plain).disabled(store.busy)
+                                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.94)))
+                            }
+                        }.frame(width: 52, height: 44).contentShape(Rectangle())
+                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
+                        Spacer(minLength: 8)
+                        Button {
+                            UIPasteboard.general.string = store.draft
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            UIAccessibility.post(notification: .announcement, argument: "已复制")
+                        } label: {
+                            toolSurface { Image(systemName: "doc.on.doc") }
+                        }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
+                            .disabled(store.draft.isEmpty || store.busy).accessibilityLabel("复制文本")
+                        ZStack {
+                            if !store.draft.isEmpty {
+                                Button(action: sendDraft) {
+                                    toolSurface(tinted: true) {
+                                        ZStack {
+                                            Image(systemName: "paperplane.fill").opacity(store.busy ? 0 : 1)
+                                            ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
+                                        }
+                                    }
+                                }.buttonStyle(.plain).allowsHitTesting(canSend)
+                                    .opacity(canSend || store.busy ? 1 : 0.4)
+                                    .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
+                                    .accessibilityHint("收起键盘并发送当前内容")
+                                    .transition(.opacity)
+                            }
+                        }.frame(width: 52, height: 44).contentShape(Rectangle())
+                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
+
+                    }
+                    .overlay(alignment: .center) {
+                        if hasClipboardText {
+                            Button(action: pasteDraft) {
+                                toolSurface { Image(systemName: "doc.on.clipboard") }
+                            }.buttonStyle(.plain).frame(width: 52, height: 44).contentShape(Rectangle())
+                                .disabled(store.busy).accessibilityLabel("粘贴文本")
+                                .transition(.opacity)
+                        }
+                    }
+                    .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: hasClipboardText)
                 }
             }
-        }.padding(.horizontal, 20).padding(.vertical, 12)
+        }.padding(.horizontal, 20).padding(.vertical, 8)
+    }
+    private func toolSurface<Content: View>(tinted: Bool = false, @ViewBuilder content: () -> Content) -> some View {
+        content().font(.system(size: 16, weight: .medium))
+            .frame(width: 52, height: 32)
+            .foregroundStyle(tinted ? Color.white : Color.primary)
+            .glassEffect(tinted ? .regular.tint(Color.accentColor).interactive() : .regular.interactive(),
+                         in: RoundedRectangle(cornerRadius: 10))
+    }
+    private func refreshClipboardAvailability() {
+        // Metadata-only checks do not read clipboard contents or request paste access.
+        hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
+    }
+    private func pasteDraft() {
+        guard !store.busy else { return }
+        guard let text = UIPasteboard.general.string ?? UIPasteboard.general.url?.absoluteString, !text.isEmpty else {
+            store.error = "剪贴板中没有可粘贴的文本。"
+            return
+        }
+        store.error = nil
+        store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
+        editing = true
     }
     private var canSend: Bool {
         !store.busy && store.code != nil && !store.needsPairing &&

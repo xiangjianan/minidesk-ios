@@ -21,6 +21,10 @@ struct AnimatedGlassTool<Content: View>: View {
         ZStack {
             if mounted {
                 content
+                    .fixedSize()
+                    .frame(width: 52, height: 48, alignment: .center)
+                    // Transform the label and system glass as one composited layer.
+                    .compositingGroup()
                     .scaleEffect(presented || reduceMotion ? 1 : 0, anchor: .center)
                     .opacity(presented ? 1 : 0)
                     .allowsHitTesting(visible)
@@ -38,13 +42,13 @@ struct AnimatedGlassTool<Content: View>: View {
                     do { try await Task.sleep(for: .milliseconds(16)) } catch { return }
                 }
                 guard !Task.isCancelled else { return }
-                withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .easeInOut(duration: 0.32)) {
+                withAnimation(.easeInOut(duration: reduceMotion ? 0.12 : 0.22)) {
                     presented = true
                 }
             } else {
                 guard mounted else { return }
-                withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.32)) { presented = false }
-                do { try await Task.sleep(for: .milliseconds(reduceMotion ? 170 : 350)) } catch { return }
+                withAnimation(.easeInOut(duration: reduceMotion ? 0.12 : 0.22)) { presented = false }
+                do { try await Task.sleep(for: .milliseconds(reduceMotion ? 140 : 240)) } catch { return }
                 guard !Task.isCancelled else { return }
                 updateWithoutAnimation { mounted = false }
             }

@@ -51,7 +51,9 @@ struct CaptureView: View {
     @FocusState private var editing: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @State private var hasClipboardText = false
+    @State private var hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
+    @State private var showsSendSuccess = false
+    @State private var successFeedbackID = 0
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
@@ -113,14 +115,30 @@ struct CaptureView: View {
         .onChange(of: editing) { _, focused in
             withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
         }
-        .onAppear(perform: refreshClipboardAvailability)
+        .onAppear { refreshClipboardAvailability() }
         .onReceive(NotificationCenter.default.publisher(for: UIPasteboard.changedNotification)) { _ in
-            refreshClipboardAvailability()
+            refreshClipboardAvailability(animated: scenePhase == .active)
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshClipboardAvailability() }
         }
-        .onDisappear { editing = false; isEditing = false }
+        .overlay(alignment: .bottom) {
+            if showsSendSuccess {
+                Label("已发送", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline).padding(.horizontal, 16).padding(.vertical, 10)
+                    .glassEffect(.regular, in: Capsule())
+                    .padding(.bottom, 66).allowsHitTesting(false)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+        }
+        .task(id: successFeedbackID) {
+            guard successFeedbackID > 0 else { return }
+            do {
+                try await Task.sleep(for: .seconds(1.6))
+                withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = false }
+            } catch { /* A new send or leaving the page cancels the previous timeout. */ }
+        }
+        .onDisappear { editing = false; isEditing = false; showsSendSuccess = false }
     }
     private var editingTools: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -129,62 +147,49 @@ struct CaptureView: View {
                     .font(.caption).foregroundStyle(.red)
             }
             GlassEffectContainer(spacing: 8) {
-                VStack(spacing: 0) {
-                    HStack(spacing: 8) {
-                        ZStack {
-                            if !store.draft.isEmpty {
-                                Button { store.draft = "" } label: {
-                                    toolSurface { Text("清空") }
-                                }.buttonStyle(.plain).disabled(store.busy)
-                                    .transition(toolTransition)
-                            }
-                        }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(toolAnimation, value: store.draft.isEmpty)
-                        Spacer(minLength: 8)
-                        ZStack {
-                            if hasClipboardText {
-                                Button(action: pasteDraft) {
-                                    toolSurface { Image(systemName: "doc.on.clipboard") }
-                                }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel("粘贴文本")
-                                    .transition(toolTransition)
-                            }
-                        }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(toolAnimation, value: hasClipboardText)
-                        ZStack {
-                            if !store.draft.isEmpty {
-                                Button(action: sendDraft) {
-                                    toolSurface(tinted: true) {
-                                        ZStack {
-                                            Image(systemName: "paperplane.fill").opacity(store.busy ? 0 : 1)
-                                            ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
-                                        }
-                                    }
-                                }.buttonStyle(.plain).allowsHitTesting(canSend)
-                                    .opacity(canSend || store.busy ? 1 : 0.4)
-                                    .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
-                                    .accessibilityHint("收起键盘并发送当前内容")
-                                    .transition(toolTransition)
-                            }
-                        }.frame(width: 52, height: 44).contentShape(Rectangle())
-                            .animation(toolAnimation, value: store.draft.isEmpty)
-
+                HStack(spacing: 8) {
+                    animatedTool(visible: !store.draft.isEmpty) {
+                        Button { store.draft = "" } label: {
+                            toolSurface { Text("清空") }
+                        }.buttonStyle(.plain).allowsHitTesting(!store.busy)
                     }
-                    .overlay(alignment: .center) {
-                        if editing {
-                            Button { editing = false } label: {
-                                toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
-                            }.buttonStyle(.plain).frame(width: 52, height: 44).contentShape(Rectangle())
-                                .accessibilityLabel("收起键盘")
-                                .transition(toolTransition)
-                        }
+                    Spacer(minLength: 8)
+                    animatedTool(visible: hasClipboardText) {
+                        Button(action: pasteDraft) {
+                            toolSurface { Image(systemName: "doc.on.clipboard") }
+                        }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel("粘贴文本")
                     }
-                    .animation(toolAnimation, value: editing)
+                    animatedTool(visible: !store.draft.isEmpty) {
+                        Button(action: sendDraft) {
+                            toolSurface(tinted: true) {
+                                ZStack {
+                                    Image(systemName: "paperplane.fill").opacity(store.busy ? 0 : 1)
+                                    ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
+                                }
+                            }
+                        }.buttonStyle(.plain).allowsHitTesting(canSend)
+                            .opacity(canSend || store.busy ? 1 : 0.4)
+                            .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
+                            .accessibilityHint("收起键盘并发送当前内容")
+                    }
+                }
+                .overlay(alignment: .center) {
+                    animatedTool(visible: editing) {
+                        Button { editing = false } label: {
+                            toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
+                        }.buttonStyle(.plain).accessibilityLabel("收起键盘")
+                    }
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 8)
     }
-    private var toolTransition: AnyTransition {
-        reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.65, anchor: .center))
+    private func animatedTool<Content: View>(visible: Bool, @ViewBuilder content: () -> Content) -> some View {
+        // Keep the glass and its layout mounted throughout both animation directions.
+        content().frame(width: 52, height: 44).contentShape(Rectangle())
+            .scaleEffect(visible || reduceMotion ? 1 : 0.65, anchor: .center)
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(visible).accessibilityHidden(!visible)
+            .animation(visible ? toolAnimation : .easeInOut(duration: reduceMotion ? 0.15 : 0.28), value: visible)
     }
     private var toolAnimation: Animation {
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)
@@ -196,9 +201,13 @@ struct CaptureView: View {
             .glassEffect(tinted ? .regular.tint(Color.accentColor).interactive() : .regular.interactive(),
                          in: Capsule())
     }
-    private func refreshClipboardAvailability() {
-        // Metadata-only checks do not read clipboard contents or request paste access.
-        hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
+    private func refreshClipboardAvailability(animated: Bool = false) {
+        // Appearance/resume checks must never animate the initial screen layout.
+        var transaction = Transaction(animation: animated ? toolAnimation : nil)
+        transaction.disablesAnimations = !animated
+        withTransaction(transaction) {
+            hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
+        }
     }
     private func pasteDraft() {
         guard !store.busy else { return }
@@ -216,7 +225,13 @@ struct CaptureView: View {
     private func sendDraft() {
         guard canSend else { return }
         editing = false
-        Task { await store.send() }
+        Task {
+            await store.send()
+            if store.error == nil, store.message != nil {
+                withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = true }
+                successFeedbackID += 1
+            }
+        }
     }
 }
 

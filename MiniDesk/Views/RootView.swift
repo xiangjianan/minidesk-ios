@@ -43,20 +43,16 @@ struct CaptureView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
     @FocusState private var editing: Bool
-    @State private var clearDraft = false
     var body: some View {
         @Bindable var store = store
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                HStack {
+                if store.code == nil || store.needsPairing {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("先记下来。\n回到桌面再继续。")
                             .font(.system(.largeTitle, design: .rounded, weight: .bold))
-                        Text("给想法留个位置。") .foregroundStyle(.secondary)
+                        Text("给想法留个位置。").foregroundStyle(.secondary)
                     }
-                    Spacer(minLength: 0)
-                }
-                if store.code == nil || store.needsPairing {
                     Button { showPairing = true } label: {
                         Label(store.needsPairing ? "重新配对桌面" : "连接我的桌面", systemImage: "link")
                             .frame(maxWidth: .infinity).padding(.vertical, 8)
@@ -98,21 +94,21 @@ struct CaptureView: View {
                 if let error = store.error {
                     Label(error, systemImage: "exclamationmark.circle").font(.subheadline).foregroundStyle(.red)
                 }
-                if let message = store.message {
-                    Label(message, systemImage: "checkmark.circle.fill").font(.subheadline).foregroundStyle(.secondary)
-                }
-                Button {
-                    editing = false
-                    Task { await store.send() }
-                } label: {
+                Button(action: sendDraft) {
                     HStack {
-                        if store.busy { ProgressView().tint(.white) } else { Image(systemName: "paperplane.fill") }
-                        Text(store.busy ? "正在发送…" : "发送到桌面")
+                        ZStack {
+                            Image(systemName: "paperplane.fill").opacity(store.busy ? 0 : 1)
+                            ProgressView().tint(.white).opacity(store.busy ? 1 : 0)
+                        }.frame(width: 22, height: 22)
+                        Text("发送到桌面")
                     }.frame(maxWidth: .infinity).padding(.vertical, 8)
                 }.buttonStyle(.glassProminent).controlSize(.large)
-                    .disabled(store.busy || store.code == nil || store.needsPairing || store.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                Text("通过 HTTPS 发送到中转服务。桌面端定时收取，也可手动同步。")
-                    .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity)
+                    // Keep the glass enabled during delivery: clearing the saved draft
+                    // must not change its material halfway through the pressed state.
+                    .disabled(!store.busy && !canSend)
+                    .allowsHitTesting(!store.busy)
+                    .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
+                    .transaction { $0.animation = nil }
             }.padding(24)
         }
         .background { DeskBackdrop() }
@@ -123,21 +119,26 @@ struct CaptureView: View {
                     .disabled(store.busy).accessibilityLabel("桌面配对")
             }
             ToolbarItemGroup(placement: .keyboard) {
-                Button("清空", role: .destructive) { clearDraft = true }.disabled(store.draft.isEmpty || store.busy)
+                Button("清空", role: .destructive) { store.draft = "" }.disabled(store.draft.isEmpty || store.busy)
                 Spacer()
-                Button("完成") { editing = false }
+                Button("发送", action: sendDraft).disabled(!canSend)
             }
         }
-        .confirmationDialog("清空当前草稿？", isPresented: $clearDraft, titleVisibility: .visible) {
-            Button("清空草稿", role: .destructive) { store.draft = "" }
-        }
+    }
+    private var canSend: Bool {
+        !store.busy && store.code != nil && !store.needsPairing &&
+        !store.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    private func sendDraft() {
+        guard canSend else { return }
+        editing = false
+        Task { await store.send() }
     }
 }
 
 struct HistoryView: View {
     @Environment(DeskStore.self) private var store
     @State private var confirmClear = false
-    @State private var discardID: String?
     var body: some View {
         List {
             Section {
@@ -156,7 +157,7 @@ struct HistoryView: View {
                     }
                     Text(record.payload.text).textSelection(.enabled)
                     HStack {
-                        Text(record.date, format: .dateTime.month().day().hour().minute()).font(.caption).foregroundStyle(.secondary)
+                        Text(record.date, formatter: Self.recordDateFormatter).font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         if store.canRetry(record) {
                             Button("重试", systemImage: "arrow.clockwise") { Task { await store.retry(record.id) } }
@@ -169,7 +170,7 @@ struct HistoryView: View {
                     }
                 }.padding(.vertical, 6)
                     .swipeActions {
-                        Button("删除", role: .destructive) { discardID = record.id }.disabled(store.busy)
+                        Button("删除", role: .destructive) { store.discard(record.id) }.disabled(store.busy)
                     }
             }
         }
@@ -180,13 +181,21 @@ struct HistoryView: View {
                     .disabled(store.busy || !store.records.contains { $0.accepted })
             }
         }
-        .confirmationDialog("删除这条本机记录？未发送的内容将被丢弃。", isPresented: Binding(get: { discardID != nil }, set: { if !$0 { discardID = nil } }), titleVisibility: .visible) {
-            Button("删除记录", role: .destructive) { if let id = discardID { store.discard(id) }; discardID = nil }
-        }
-        .confirmationDialog("清除本机已接收的记录？", isPresented: $confirmClear, titleVisibility: .visible) {
-            Button("清除记录", role: .destructive) { store.clearAccepted() }
+        .alert("删除已接收的发送记录？", isPresented: $confirmClear) {
+            Button("取消", role: .cancel) {}
+            Button("删除", role: .destructive) { store.clearAccepted() }
+        } message: {
+            Text("将删除本机所有已接收的记录。待重试的内容会保留。")
         }
     }
+    private static let recordDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_CN")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy年M月d日 HH:mm"
+        return formatter
+    }()
+
 }
 
 struct DesktopView: View {

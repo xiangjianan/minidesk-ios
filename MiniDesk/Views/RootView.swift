@@ -107,6 +107,7 @@ struct CaptureView: View {
                 .disabled(store.busy).accessibilityLabel("AI 润色")
                 .accessibilityValue(store.polish ? "已开启" : "已关闭")
                 .accessibilityAddTraits(store.polish ? [.isSelected] : [])
+                .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
             }
         }
         .onChange(of: editing) { _, focused in
@@ -129,13 +130,6 @@ struct CaptureView: View {
             }
             GlassEffectContainer(spacing: 8) {
                 VStack(spacing: 0) {
-                    if editing {
-                        Button { editing = false } label: {
-                            toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
-                        }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
-                            .accessibilityLabel("收起键盘")
-                            .frame(maxWidth: .infinity)
-                    }
                     HStack(spacing: 8) {
                         ZStack {
                             if !store.draft.isEmpty {
@@ -175,7 +169,14 @@ struct CaptureView: View {
                             .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
 
                     }
-
+                    .overlay(alignment: .center) {
+                        if editing {
+                            Button { editing = false } label: {
+                                toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
+                            }.buttonStyle(.plain).frame(width: 52, height: 44).contentShape(Rectangle())
+                                .accessibilityLabel("收起键盘")
+                        }
+                    }
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 8)
@@ -199,7 +200,6 @@ struct CaptureView: View {
         }
         store.error = nil
         store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
-        editing = true
     }
     private var canSend: Bool {
         !store.busy && store.code != nil && !store.needsPairing &&

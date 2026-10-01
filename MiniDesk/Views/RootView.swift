@@ -57,6 +57,7 @@ struct CaptureView: View {
                     Label(kind.title, systemImage: kind.symbol).tag(kind)
                 }
             }.pickerStyle(.segmented).disabled(store.busy)
+                .sensoryFeedback(.selection, trigger: store.kind)
                 .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
             if store.code == nil || store.needsPairing {
                 Button {
@@ -102,36 +103,47 @@ struct CaptureView: View {
         .onDisappear { editing = false; isEditing = false }
     }
     private var editingTools: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        @Bindable var store = store
+        return VStack(alignment: .leading, spacing: 12) {
             if let error = store.error {
                 Label(error, systemImage: "exclamationmark.circle")
                     .font(.caption).foregroundStyle(.red)
             }
             GlassEffectContainer(spacing: 12) {
                 HStack(spacing: 12) {
+                    Button { store.draft = "" } label: {
+                        Text("清空").font(.subheadline)
+                            .frame(width: 52, height: 32)
+                            .glassEffect(.regular.interactive(), in: Capsule())
+                    }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
+                        .disabled(store.draft.isEmpty || store.busy)
+                    Toggle("AI", isOn: $store.polish)
+                        .toggleStyle(.switch).font(.subheadline).fixedSize()
+                        .frame(height: 44).disabled(store.busy)
+                        .accessibilityLabel("AI 润色")
+                    Spacer(minLength: 8)
+                    // Keep the existing system-authorized clipboard paste control.
                     PasteButton(payloadType: String.self) { values in
                         guard let text = values.first else { return }
                         store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
-                    }.labelStyle(.iconOnly).disabled(store.busy).accessibilityLabel("粘贴内容")
-                    Button("清空") { store.draft = "" }
-                        .buttonStyle(.glass).disabled(store.draft.isEmpty || store.busy)
-                    Button { store.polish.toggle() } label: { Image(systemName: "sparkles") }
-                        .buttonStyle(.glass).tint(store.polish ? Color.accentColor : Color.secondary)
-                        .disabled(store.busy).accessibilityLabel("AI 整理")
-                        .accessibilityValue(store.polish ? "已开启" : "已关闭")
-                    Spacer(minLength: 8)
+                    }.labelStyle(.iconOnly).controlSize(.small).buttonStyle(.glass)
+                        .frame(width: 44, height: 44).disabled(store.busy)
+                        .accessibilityLabel("粘贴内容")
                     Button(action: sendDraft) {
                         ZStack {
-                            Image(systemName: "arrow.up").font(.title3.weight(.semibold))
+                            Image(systemName: "arrow.up").font(.system(size: 16, weight: .semibold))
                                 .opacity(store.busy ? 0 : 1)
-                            ProgressView().tint(.white).opacity(store.busy ? 1 : 0)
-                        }.frame(width: 28, height: 28)
+                            ProgressView().tint(.white).controlSize(.small).opacity(store.busy ? 1 : 0)
+                        }.frame(width: 32, height: 32)
+                            .foregroundStyle(.white)
+                            .glassEffect(.regular.tint(Color.accentColor).interactive(), in: Circle())
                     }
-                    .buttonStyle(.glassProminent).buttonBorderShape(.circle).controlSize(.large)
+                    .buttonStyle(.plain).frame(width: 44, height: 44).contentShape(Rectangle())
                     .allowsHitTesting(canSend).opacity(canSend || store.busy ? 1 : 0.4)
                     .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
                     .accessibilityHint("收起键盘并发送当前内容")
                     .transaction { $0.animation = nil }
+
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 12)
@@ -242,8 +254,11 @@ struct DesktopView: View {
                 } footer: { Text("只移除本机的配对信息，桌面端配对码仍然有效。") }
             }
         }.navigationTitle("我的桌面")
-            .confirmationDialog("断开本机配对？", isPresented: $disconnect, titleVisibility: .visible) {
+            .alert("断开本机配对？", isPresented: $disconnect) {
+                Button("取消", role: .cancel) {}
                 Button("断开配对", role: .destructive) { store.unpair() }
+            } message: {
+                Text("只移除本机的配对信息，桌面端配对码仍然有效。")
             }
     }
 }

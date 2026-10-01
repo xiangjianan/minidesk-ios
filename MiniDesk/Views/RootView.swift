@@ -184,12 +184,7 @@ struct CaptureView: View {
         }.padding(.horizontal, 20).padding(.vertical, 8)
     }
     private func animatedTool<Content: View>(visible: Bool, @ViewBuilder content: () -> Content) -> some View {
-        // Keep the glass and its layout mounted throughout both animation directions.
-        content().frame(width: 52, height: 44).contentShape(Rectangle())
-            .scaleEffect(visible || reduceMotion ? 1 : 0.65, anchor: .center)
-            .opacity(visible ? 1 : 0)
-            .allowsHitTesting(visible).accessibilityHidden(!visible)
-            .animation(visible ? toolAnimation : .easeInOut(duration: reduceMotion ? 0.15 : 0.28), value: visible)
+        AnimatedGlassTool(visible: visible, reduceMotion: reduceMotion, content: content())
     }
     private var toolAnimation: Animation {
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)

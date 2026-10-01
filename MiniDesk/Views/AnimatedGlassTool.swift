@@ -21,13 +21,13 @@ struct AnimatedGlassTool<Content: View>: View {
         ZStack {
             if mounted {
                 content
-                    .scaleEffect(presented || reduceMotion ? 1 : 0.65, anchor: .center)
+                    .scaleEffect(presented || reduceMotion ? 1 : 0, anchor: .center)
                     .opacity(presented ? 1 : 0)
                     .allowsHitTesting(visible)
                     .accessibilityHidden(!visible)
             }
         }
-        .frame(width: 52, height: 44, alignment: .center)
+        .frame(width: 52, height: 48, alignment: .center)
         .contentShape(Rectangle())
         .task(id: visible) {
             if visible {
@@ -38,13 +38,13 @@ struct AnimatedGlassTool<Content: View>: View {
                     do { try await Task.sleep(for: .milliseconds(16)) } catch { return }
                 }
                 guard !Task.isCancelled else { return }
-                withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)) {
+                withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .easeInOut(duration: 0.32)) {
                     presented = true
                 }
             } else {
                 guard mounted else { return }
-                withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.28)) { presented = false }
-                do { try await Task.sleep(for: .milliseconds(reduceMotion ? 170 : 300)) } catch { return }
+                withAnimation(.easeInOut(duration: reduceMotion ? 0.15 : 0.32)) { presented = false }
+                do { try await Task.sleep(for: .milliseconds(reduceMotion ? 170 : 350)) } catch { return }
                 guard !Task.isCancelled else { return }
                 updateWithoutAnimation { mounted = false }
             }

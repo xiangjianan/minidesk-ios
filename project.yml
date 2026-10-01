@@ -1,6 +1,7 @@
 name: MiniDesk
 options:
   bundleIdPrefix: online.minidesk
+  developmentLanguage: zh-Hans
   deploymentTarget:
     iOS: '26.0'
 settings:
@@ -31,6 +32,8 @@ targets:
     info:
       path: MiniDesk/Info.plist
       properties:
+        CFBundleDevelopmentRegion: zh-Hans
+        CFBundleLocalizations: [zh-Hans]
         ITSAppUsesNonExemptEncryption: false
         CFBundleURLTypes:
           - CFBundleURLName: online.minidesk.pairing

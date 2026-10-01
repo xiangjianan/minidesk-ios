@@ -12,6 +12,7 @@
 		343EB548261F65CDAFA2C077 /* DeskStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8D5744DDA76477B36D5C46 /* DeskStore.swift */; };
 		51BEDB48259E0BCABC8DFE06 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91BEADB9F3ADF71172CCAEB7 /* RootView.swift */; };
 		5B71D6B29B792735E39B95D1 /* AnimatedGlassTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33C81BABACB1586A24161EC /* AnimatedGlassTool.swift */; };
+		71C5918D3A440A7190D3C6A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 18B9B7753417F00BF947E915 /* InfoPlist.strings */; };
 		A31742410C6FA9AFC8D2F718 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BDF5FD7AF2058458EEDB19 /* Protocol.swift */; };
 		C5DE40A75676B513E097EA0B /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */; };
 		C732B4BB5EC0F682C5A0B08C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */; };
@@ -24,6 +25,7 @@
 		2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		59BDF5FD7AF2058458EEDB19 /* Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
+		5F86641291CAE78D4BA91012 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		63EB810D91B3AA44C3EBB102 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
 		714598674CA89C060429C8FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniDeskApp.swift; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 				89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */,
 				31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */,
 				3911565B269130BA4D5CFCDA /* Core */,
+				18B9B7753417F00BF947E915 /* InfoPlist.strings */,
 				D9AF8D3243D4DD4C56750041 /* Views */,
 			);
 			path = MiniDesk;
@@ -121,11 +124,11 @@
 				};
 			};
 			buildConfigurationList = 49C70F84481192F8A679BB99 /* Build configuration list for PBXProject "MiniDesk" */;
-			developmentRegion = en;
+			developmentRegion = "zh-Hans";
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
-				en,
+				"zh-Hans",
 			);
 			mainGroup = 274B1F9EA54B5AAE1950A577;
 			minimizedProjectReferenceProxies = 1;
@@ -145,6 +148,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				061F5535FA52475436FB32C4 /* Assets.xcassets in Resources */,
+				71C5918D3A440A7190D3C6A6 /* InfoPlist.strings in Resources */,
 				C732B4BB5EC0F682C5A0B08C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,6 +172,17 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		18B9B7753417F00BF947E915 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5F86641291CAE78D4BA91012 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		64736119081332E9601C35DB /* Debug */ = {

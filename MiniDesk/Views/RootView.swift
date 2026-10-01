@@ -96,10 +96,14 @@ struct CaptureView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { store.polish.toggle() } label: {
-                    Label("AI润色", systemImage: store.polish ? "checkmark" : "sparkles")
-                        .font(.subheadline)
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(store.polish
+                                ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple, .blue, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                : AnyShapeStyle(Color.secondary))
+                        Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
+                    }.font(.subheadline)
                 }
-                .tint(store.polish ? Color.accentColor : Color.secondary)
                 .disabled(store.busy).accessibilityLabel("AI 润色")
                 .accessibilityValue(store.polish ? "已开启" : "已关闭")
                 .accessibilityAddTraits(store.polish ? [.isSelected] : [])
@@ -143,14 +147,15 @@ struct CaptureView: View {
                         }.frame(width: 52, height: 44).contentShape(Rectangle())
                             .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
                         Spacer(minLength: 8)
-                        Button {
-                            UIPasteboard.general.string = store.draft
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            UIAccessibility.post(notification: .announcement, argument: "已复制")
-                        } label: {
-                            toolSurface { Image(systemName: "doc.on.doc") }
-                        }.buttonStyle(.plain).frame(height: 44).contentShape(Rectangle())
-                            .disabled(store.draft.isEmpty || store.busy).accessibilityLabel("复制文本")
+                        ZStack {
+                            if hasClipboardText {
+                                Button(action: pasteDraft) {
+                                    toolSurface { Image(systemName: "doc.on.clipboard") }
+                                }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel("粘贴文本")
+                                    .transition(.opacity)
+                            }
+                        }.frame(width: 52, height: 44).contentShape(Rectangle())
+                            .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: hasClipboardText)
                         ZStack {
                             if !store.draft.isEmpty {
                                 Button(action: sendDraft) {
@@ -170,16 +175,7 @@ struct CaptureView: View {
                             .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: store.draft.isEmpty)
 
                     }
-                    .overlay(alignment: .center) {
-                        if hasClipboardText {
-                            Button(action: pasteDraft) {
-                                toolSurface { Image(systemName: "doc.on.clipboard") }
-                            }.buttonStyle(.plain).frame(width: 52, height: 44).contentShape(Rectangle())
-                                .disabled(store.busy).accessibilityLabel("粘贴文本")
-                                .transition(.opacity)
-                        }
-                    }
-                    .animation(.easeInOut(duration: reduceMotion ? 0.1 : 0.2), value: hasClipboardText)
+
                 }
             }
         }.padding(.horizontal, 20).padding(.vertical, 8)
@@ -189,7 +185,7 @@ struct CaptureView: View {
             .frame(width: 52, height: 32)
             .foregroundStyle(tinted ? Color.white : Color.primary)
             .glassEffect(tinted ? .regular.tint(Color.accentColor).interactive() : .regular.interactive(),
-                         in: RoundedRectangle(cornerRadius: 10))
+                         in: Capsule())
     }
     private func refreshClipboardAvailability() {
         // Metadata-only checks do not read clipboard contents or request paste access.

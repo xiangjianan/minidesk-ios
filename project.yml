@@ -1,0 +1,38 @@
+name: MiniDesk
+options:
+  bundleIdPrefix: online.minidesk
+  deploymentTarget:
+    iOS: '26.0'
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    DEVELOPMENT_TEAM: ''
+targets:
+  MiniDesk:
+    type: application
+    platform: iOS
+    sources: [MiniDesk]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: online.minidesk.ios
+        TARGETED_DEVICE_FAMILY: '1,2'
+        MARKETING_VERSION: '1.0.0'
+        CURRENT_PROJECT_VERSION: 1
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Mini Desk
+        INFOPLIST_KEY_NSCameraUsageDescription: 扫描桌面 Mini Desk 二维码，配对你的工作区。
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: 'UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight'
+    info:
+      path: MiniDesk/Info.plist
+      properties:
+        ITSAppUsesNonExemptEncryption: false
+        CFBundleURLTypes:
+          - CFBundleURLName: online.minidesk.pairing
+            CFBundleURLSchemes: [minidesk]
+    scheme:
+      gatherCoverageData: false

@@ -1,0 +1,368 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		061F5535FA52475436FB32C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD8A98C7983BEC6475286B43 /* Assets.xcassets */; };
+		1E98868AB89905C5D1104C5D /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D76D2B5C6CCDE1069089807 /* PairingView.swift */; };
+		343EB548261F65CDAFA2C077 /* DeskStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8D5744DDA76477B36D5C46 /* DeskStore.swift */; };
+		51BEDB48259E0BCABC8DFE06 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91BEADB9F3ADF71172CCAEB7 /* RootView.swift */; };
+		A31742410C6FA9AFC8D2F718 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BDF5FD7AF2058458EEDB19 /* Protocol.swift */; };
+		C5DE40A75676B513E097EA0B /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */; };
+		C732B4BB5EC0F682C5A0B08C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */; };
+		D93CA9E733F202FE129F23A9 /* MiniDeskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */; };
+		F93857D9F5AE4C6915EEA177 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EB810D91B3AA44C3EBB102 /* Keychain.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1D76D2B5C6CCDE1069089807 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
+		2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		59BDF5FD7AF2058458EEDB19 /* Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
+		63EB810D91B3AA44C3EBB102 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		714598674CA89C060429C8FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniDeskApp.swift; sourceTree = "<group>"; };
+		91BEADB9F3ADF71172CCAEB7 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		BE8D5744DDA76477B36D5C46 /* DeskStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskStore.swift; sourceTree = "<group>"; };
+		DD8A98C7983BEC6475286B43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		ED8DF68A2C9C32D634E724A4 /* MiniDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MiniDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		274B1F9EA54B5AAE1950A577 = {
+			isa = PBXGroup;
+			children = (
+				2DD1D0D6E2A06390818047E0 /* MiniDesk */,
+				C451C9CE6572DA0B88813596 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2DD1D0D6E2A06390818047E0 /* MiniDesk */ = {
+			isa = PBXGroup;
+			children = (
+				DD8A98C7983BEC6475286B43 /* Assets.xcassets */,
+				BE8D5744DDA76477B36D5C46 /* DeskStore.swift */,
+				714598674CA89C060429C8FC /* Info.plist */,
+				63EB810D91B3AA44C3EBB102 /* Keychain.swift */,
+				89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */,
+				31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */,
+				3911565B269130BA4D5CFCDA /* Core */,
+				D9AF8D3243D4DD4C56750041 /* Views */,
+			);
+			path = MiniDesk;
+			sourceTree = "<group>";
+		};
+		3911565B269130BA4D5CFCDA /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				59BDF5FD7AF2058458EEDB19 /* Protocol.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		C451C9CE6572DA0B88813596 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ED8DF68A2C9C32D634E724A4 /* MiniDesk.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D9AF8D3243D4DD4C56750041 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1D76D2B5C6CCDE1069089807 /* PairingView.swift */,
+				2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */,
+				91BEADB9F3ADF71172CCAEB7 /* RootView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F1EF9ABCDE7BB79F4E510023 /* MiniDesk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D119A67727BAD40E54D93582 /* Build configuration list for PBXNativeTarget "MiniDesk" */;
+			buildPhases = (
+				AB12298A5B560B99E1A1EBFF /* Sources */,
+				FAA79F09949E20FB97795929 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MiniDesk;
+			packageProductDependencies = (
+			);
+			productName = MiniDesk;
+			productReference = ED8DF68A2C9C32D634E724A4 /* MiniDesk.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EAF620922BB18320C4A86748 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					F1EF9ABCDE7BB79F4E510023 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 49C70F84481192F8A679BB99 /* Build configuration list for PBXProject "MiniDesk" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 274B1F9EA54B5AAE1950A577;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C451C9CE6572DA0B88813596 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F1EF9ABCDE7BB79F4E510023 /* MiniDesk */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FAA79F09949E20FB97795929 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				061F5535FA52475436FB32C4 /* Assets.xcassets in Resources */,
+				C732B4BB5EC0F682C5A0B08C /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AB12298A5B560B99E1A1EBFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				343EB548261F65CDAFA2C077 /* DeskStore.swift in Sources */,
+				F93857D9F5AE4C6915EEA177 /* Keychain.swift in Sources */,
+				D93CA9E733F202FE129F23A9 /* MiniDeskApp.swift in Sources */,
+				1E98868AB89905C5D1104C5D /* PairingView.swift in Sources */,
+				A31742410C6FA9AFC8D2F718 /* Protocol.swift in Sources */,
+				C5DE40A75676B513E097EA0B /* QRScannerView.swift in Sources */,
+				51BEDB48259E0BCABC8DFE06 /* RootView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		64736119081332E9601C35DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MiniDesk/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mini Desk";
+				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 Mini Desk 二维码，配对你的工作区。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = online.minidesk.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B7ED2CF8E45AF6E0DA95462E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MiniDesk/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mini Desk";
+				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 Mini Desk 二维码，配对你的工作区。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = online.minidesk.ios;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D957E28BF8D2DB7E1D155272 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		E17E3B16B0F8DD8FC84A820E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		49C70F84481192F8A679BB99 /* Build configuration list for PBXProject "MiniDesk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D957E28BF8D2DB7E1D155272 /* Debug */,
+				E17E3B16B0F8DD8FC84A820E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D119A67727BAD40E54D93582 /* Build configuration list for PBXNativeTarget "MiniDesk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				64736119081332E9601C35DB /* Debug */,
+				B7ED2CF8E45AF6E0DA95462E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EAF620922BB18320C4A86748 /* Project object */;
+}

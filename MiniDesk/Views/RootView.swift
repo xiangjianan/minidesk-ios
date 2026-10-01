@@ -150,8 +150,9 @@ struct CaptureView: View {
                 HStack(spacing: 8) {
                     animatedTool(visible: !store.draft.isEmpty) {
                         Button { store.draft = "" } label: {
-                            toolSurface { Text("清空") }
+                            toolSurface { Image(systemName: "eraser") }
                         }.buttonStyle(.plain).allowsHitTesting(!store.busy)
+                            .accessibilityLabel("清空草稿")
                     }
                     Spacer(minLength: 8)
                     animatedTool(visible: hasClipboardText) {

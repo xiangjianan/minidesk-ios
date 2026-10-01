@@ -150,7 +150,7 @@ struct CaptureView: View {
                 HStack(spacing: 8) {
                     animatedTool(visible: !store.draft.isEmpty) {
                         Button { store.draft = "" } label: {
-                            toolSurface { Image(systemName: "eraser") }
+                            toolSurface(destructive: true) { Image(systemName: "trash") }
                         }.buttonStyle(.plain).allowsHitTesting(!store.busy)
                             .accessibilityLabel("清空草稿")
                     }
@@ -191,10 +191,10 @@ struct CaptureView: View {
     private var toolAnimation: Animation {
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)
     }
-    private func toolSurface<Content: View>(tinted: Bool = false, @ViewBuilder content: () -> Content) -> some View {
+    private func toolSurface<Content: View>(tinted: Bool = false, destructive: Bool = false, @ViewBuilder content: () -> Content) -> some View {
         content().font(.system(size: 17, weight: .medium))
             .frame(width: 58, height: 44)
-            .foregroundStyle(tinted ? Color.white : Color.primary)
+            .foregroundStyle(destructive ? Color.red : (tinted ? Color.white : Color.primary))
             .glassEffect(tinted ? .regular.tint(Color.accentColor).interactive() : .regular.interactive(),
                          in: Capsule())
     }

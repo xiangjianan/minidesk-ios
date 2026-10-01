@@ -146,7 +146,7 @@ struct CaptureView: View {
                 Label(error, systemImage: "exclamationmark.circle")
                     .font(.caption).foregroundStyle(.red)
             }
-            GlassEffectContainer(spacing: 8) {
+            Group {
                 HStack(spacing: 8) {
                     animatedTool(visible: !store.draft.isEmpty) {
                         Button { store.draft = "" } label: {
@@ -185,6 +185,7 @@ struct CaptureView: View {
     }
     private func animatedTool<Content: View>(visible: Bool, @ViewBuilder content: () -> Content) -> some View {
         AnimatedGlassTool(visible: visible, reduceMotion: reduceMotion, content: content())
+            .frame(width: 58, height: 48)
     }
     private var toolAnimation: Animation {
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)

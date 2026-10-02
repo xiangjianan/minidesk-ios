@@ -113,6 +113,19 @@ struct CaptureView: View {
                 }
                 .contentShape(Rectangle())
                 .simultaneousGesture(TapGesture().onEnded { if store.isPaired && !store.busy { editing = true } })
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 30).onEnded { gesture in
+                        guard store.isPaired, !store.busy else { return }
+                        let horizontal = gesture.translation.width
+                        let vertical = gesture.translation.height
+                        // Only deliberate horizontal swipes change the capture type.
+                        // Vertical drags remain available for scrolling and keyboard dismissal.
+                        guard abs(horizontal) >= 60, abs(horizontal) > abs(vertical) * 1.5 else { return }
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            store.kind = horizontal > 0 ? .todo : .note
+                        }
+                    }
+                )
             } else {
                 ContentUnavailableView {
                     Label(store.needsPairing ? "需要重新配对" : "配对后才能使用速记", systemImage: "lock.fill")

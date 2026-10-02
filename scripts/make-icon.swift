@@ -3,9 +3,9 @@ import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
 
-// Export the pink-purple-blue artwork to an opaque 1024px iOS app icon.
+// Export the layered glass artwork to an opaque 1024px iOS app icon.
 let sourceURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    .appendingPathComponent("assets/minidesk-purple-source.png")
+    .appendingPathComponent("assets/minidesk-glass-source.png")
 let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil)!
 let image = CGImageSourceCreateImageAtIndex(source, 0, nil)!
 let context = CGContext(data: nil, width: 1024, height: 1024, bitsPerComponent: 8,

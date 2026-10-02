@@ -1,6 +1,14 @@
 # App icon artwork
 
-`minidesk-purple-source.png` is the current artwork, generated with the built-in imagegen tool on 2026-10-02. It follows the user's premium-style reference: white surround, pink-purple-blue circle, and a white computer mark, excluding the lock badge and caption.
+`minidesk-glass-source.png` is the current artwork, edited with built-in imagegen on 2026-10-02. It reduces the circle and computer sizes while adding translucent edges, soft highlights and shadows for a layered Liquid Glass inspired appearance.
+
+## Current glass prompt
+
+Use case: precise-object-edit. Edit the attached current MiniDesk app icon. Preserve its square white full-bleed background, central circular pink-purple-blue gradient, and desktop-computer silhouette with rounded rectangular open screen, short stem and base. Make the circle noticeably but modestly smaller: diameter 76% of canvas instead of ~90%; make the computer also smaller, total width 45% of canvas instead of ~55%. Keep both centered and leave generous calm white margins. Upgrade both into tasteful Apple Liquid Glass inspired layered objects: back circle is a shallow translucent tinted glass lens carrying the same pink at top, lavender at right and periwinkle/electric blue at bottom-left gradient, subtly rounded/refractive rim, restrained upper-left highlight, very soft fine shadow onto white. The computer mark floats slightly above the lens as pearly translucent white glass, clearly legible with subtle beveled edge highlights and gentle color refraction, open inner screen revealing the lens underneath. Visually distinct depth between the two layers, a delicate contact shadow behind the computer, restrained polished modern iOS appearance. Front-on straight view, crisp balanced geometry. Avoid heavy 3D extrusion, plastic look, metallic material, large glare blobs, neon glow, busy texture. No text, extra symbols, badges or stars. No baked outer rounded app corners, no mockup. Produce one opaque square 1024x1024 production-ready icon.
+
+## Earlier purple artwork
+
+`minidesk-purple-source.png` is the previous artwork, generated with the built-in imagegen tool on 2026-10-02. It follows the user's premium-style reference: white surround, pink-purple-blue circle, and a white computer mark, excluding the lock badge and caption.
 
 ## Current generation prompt
 

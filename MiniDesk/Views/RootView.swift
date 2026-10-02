@@ -88,11 +88,6 @@ struct CaptureView: View {
                         .padding(.horizontal, 25).padding(.top, 8)
                         .allowsHitTesting(false)
                 }
-                if showsSendSuccess {
-                    SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
-                        .padding(.horizontal, 25).padding(.top, 8)
-                        .transition(.opacity)
-                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
@@ -100,6 +95,12 @@ struct CaptureView: View {
         }
         .background { DeskBackdrop() }
         .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
+        .overlay(alignment: .center) {
+            if showsSendSuccess {
+                SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
+                    .transition(.opacity)
+            }
+        }
         .navigationTitle("MiniDesk").navigationBarTitleDisplayMode(.inline)
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
@@ -292,7 +293,8 @@ struct HistoryView: View {
                     .accessibilityHint("轻点复制内容")
                     .accessibilityAddTraits(.isButton)
                     .swipeActions {
-                        Button("删除", role: .destructive) { store.discard(record.id) }.disabled(store.busy)
+                        Button("删除", role: .destructive) { store.discard(record.id) }
+                            .tint(.red).disabled(store.busy)
                     }
             }
         }

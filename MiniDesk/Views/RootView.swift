@@ -337,6 +337,7 @@ struct DesktopView: View {
     @Binding var showPairing: Bool
     @State private var disconnect = false
     @State private var copyFeedbackID = 0
+    @State private var copiedAddress: String?
     var body: some View {
         List {
             Section {
@@ -348,6 +349,7 @@ struct DesktopView: View {
                     if let code = store.code {
                         Button {
                             UIPasteboard.general.string = code
+                            copiedAddress = nil
                             copyFeedbackID += 1
                         } label: {
                             Text(Pairing.masked(code)).font(.system(.body, design: .monospaced))
@@ -370,7 +372,9 @@ struct DesktopView: View {
             }
             Section {
                 Button("复制桌面端地址", systemImage: "doc.on.clipboard") {
-                    UIPasteboard.general.string = "https://minidesk.online"
+                    let address = "https://minidesk.online"
+                    UIPasteboard.general.string = address
+                    copiedAddress = address
                     copyFeedbackID += 1
                 }
             } footer: {
@@ -383,7 +387,7 @@ struct DesktopView: View {
             }
         }.navigationTitle("配对")
             .scrollIndicators(.hidden)
-            .modifier(CopyFeedback(trigger: copyFeedbackID))
+            .modifier(CopyFeedback(trigger: copyFeedbackID, detail: copiedAddress))
             .alert("断开本机配对？", isPresented: $disconnect) {
                 Button("取消", role: .cancel) {}
                 Button("断开配对", role: .destructive) { store.unpair() }
@@ -396,9 +400,17 @@ struct DesktopView: View {
 private struct SuccessNotice: View {
     let text: String
     let symbol: String
+    var detail: String? = nil
     var body: some View {
-        Label(text, systemImage: symbol)
-            .font(.system(size: 14, weight: .semibold))
+        VStack(spacing: 5) {
+            Label(text, systemImage: symbol)
+                .font(.system(size: 14, weight: .semibold))
+            if let detail {
+                Text(detail).font(.system(size: 13, weight: .medium))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.center)
+            }
+        }
             .foregroundStyle(.white)
             .padding(.horizontal, 18).padding(.vertical, 12)
             .glassEffect(.regular.tint(Color.accentColor), in: Capsule())
@@ -410,12 +422,13 @@ private struct SuccessNotice: View {
 
 private struct CopyFeedback: ViewModifier {
     let trigger: Int
+    var detail: String? = nil
     @State private var visible = false
     func body(content: Content) -> some View {
         content
             .overlay(alignment: .top) {
                 if visible {
-                    SuccessNotice(text: "文本已复制到剪贴板", symbol: "checkmark.circle.fill")
+                    SuccessNotice(text: "文本已复制到剪贴板", symbol: "checkmark.circle.fill", detail: detail)
                         .padding(.top, 8).transition(.opacity)
                 }
             }

@@ -95,9 +95,10 @@ struct CaptureView: View {
         }
         .background { DeskBackdrop() }
         .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
-        .overlay(alignment: .center) {
+        .overlay(alignment: .leading) {
             if showsSendSuccess {
                 SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
+                    .padding(.leading, 25)
                     .transition(.opacity)
             }
         }

@@ -13,43 +13,44 @@ struct PairingView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Image(systemName: "link").font(.system(size: 44)).foregroundStyle(.tint)
-                        .frame(width: 90, height: 90).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26))
-                    Text("和你的桌面\n建立连接。") .font(.largeTitle.bold())
-                    Text("打开桌面端工作区菜单中的「手机速记」，获取二维码或 12 位配对码。") .foregroundStyle(.secondary)
-                    if required {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Button {
-                                UIPasteboard.general.string = desktopAddress
-                                copyFeedbackID += 1
-                            } label: {
-                                Label("复制桌面端地址", systemImage: "doc.on.clipboard")
-                                    .frame(maxWidth: .infinity)
-                            }.buttonStyle(.glass).controlSize(.large)
-                            Text("请在电脑浏览器中打开 minidesk.online，再获取配对码或二维码。")
-                                .font(.caption).foregroundStyle(.secondary)
+                    Text("连接你的电脑").font(.title2.bold())
+                    pairingStep(1, title: "电脑：打开 MiniDesk", description: "在电脑浏览器访问 minidesk.online。") {
+                        Button {
+                            UIPasteboard.general.string = desktopAddress
+                            copyFeedbackID += 1
+                        } label: {
+                            Label("复制桌面端地址", systemImage: "doc.on.clipboard")
+                                .frame(maxWidth: .infinity)
+                        }.buttonStyle(.glass).controlSize(.large)
+                    }
+                    pairingStep(2, title: "电脑：获取配对码", description: "工作区菜单 →「手机速记」。") {}
+                    pairingStep(3, title: "手机：连接电脑", description: "扫码或输入配对码，也可粘贴配对链接。") {
+                        Button { scanning = true } label: {
+                            Label("扫描桌面二维码", systemImage: "qrcode.viewfinder")
+                                .frame(maxWidth: .infinity)
+                        }.buttonStyle(.glass).controlSize(.large).disabled(store.busy)
+                        TextField("输入 12 位配对码或粘贴链接", text: $input)
+                            .font(.system(.body, design: .monospaced))
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled().textFieldStyle(.roundedBorder)
+                            .accessibilityLabel("配对码或配对链接").disabled(store.busy)
+                        Button {
+                            Task {
+                                await store.pair(input)
+                                if !required && store.code == Pairing.normalize(input) && store.error == nil { dismiss() }
+                            }
+                        } label: {
+                            HStack {
+                                if store.busy { ProgressView() }
+                                Text(store.busy ? "验证中…" : "连接桌面")
+                            }.frame(maxWidth: .infinity)
+                        }.buttonStyle(.glassProminent).controlSize(.large)
+                            .disabled(store.busy || !Pairing.isValid(Pairing.normalize(input)))
+                        if let error = store.error {
+                            Text(error).foregroundStyle(.red).font(.subheadline)
                         }
                     }
-                    TextField("例如 ABCD EFGH 2345", text: $input)
-                        .font(.system(.title3, design: .monospaced)).textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled().textFieldStyle(.roundedBorder)
-                        .accessibilityLabel("配对码或配对链接").disabled(store.busy)
-                    Button { scanning = true } label: {
-                        Label("扫描桌面二维码", systemImage: "qrcode.viewfinder").frame(maxWidth: .infinity)
-                    }.buttonStyle(.glass).controlSize(.large).disabled(store.busy)
-                    if let error = store.error { Text(error).foregroundStyle(.red).font(.subheadline) }
-                    Button {
-                        Task {
-                            await store.pair(input)
-                            if !required && store.code == Pairing.normalize(input) && store.error == nil { dismiss() }
-                        }
-                    } label: {
-                        HStack { if store.busy { ProgressView() }; Text(store.busy ? "验证中…" : "连接桌面") }
-                            .frame(maxWidth: .infinity)
-                    }.buttonStyle(.glassProminent).controlSize(.large)
-                        .disabled(store.busy || !Pairing.isValid(Pairing.normalize(input)))
-                    Text(required ? "配对成功后即可使用速记和历史记录。支持粘贴桌面生成的配对链接。" : "支持直接粘贴桌面生成的配对链接。一次连接一个工作区。") .font(.caption).foregroundStyle(.secondary)
-                }.padding(28)
+                }.padding(24)
             }.background { DeskBackdrop() }
                 .navigationTitle(required ? "MiniDesk" : "配对桌面").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -72,4 +73,22 @@ struct PairingView: View {
             }
         }
     }
+
+    private func pairingStep<Content: View>(_ number: Int, title: String, description: String,
+                                           @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 10) {
+                Text("\(number)").font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 28, height: 28)
+                    .background(Color.accentColor.opacity(0.12), in: Circle())
+                    .accessibilityLabel("第 \(number) 步")
+                Text(title).font(.headline)
+            }
+            Text(description).font(.subheadline).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            content()
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+
 }

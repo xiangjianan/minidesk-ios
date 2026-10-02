@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 // Export the layered glass artwork to an opaque 1024px iOS app icon.
 let sourceURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-    .appendingPathComponent("assets/minidesk-glass-source.png")
+    .appendingPathComponent("assets/minidesk-glass-wide-source.png")
 let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil)!
 let image = CGImageSourceCreateImageAtIndex(source, 0, nil)!
 let context = CGContext(data: nil, width: 1024, height: 1024, bitsPerComponent: 8,

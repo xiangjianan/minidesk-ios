@@ -1,6 +1,14 @@
 # App icon artwork
 
-`minidesk-glass-source.png` is the current artwork, edited with built-in imagegen on 2026-10-02. It reduces the circle and computer sizes while adding translucent edges, soft highlights and shadows for a layered Liquid Glass inspired appearance.
+`minidesk-glass-wide-source.png` is the current artwork, edited with built-in imagegen on 2026-10-02. Only the glass circle is slightly larger; the canvas and computer dimensions are preserved.
+
+## Current circle adjustment prompt
+
+Precise-object-edit of attached MiniDesk icon. Change ONLY the size of the background circular pink-purple-blue glass lens: enlarge its diameter by about 6% relative to current circle, centered at exactly the same location (target diameter about 78% of canvas). Preserve the white computer foreground symbol pixel-size, shape, position, white glass appearance, highlights, bevels and shadows exactly; do NOT enlarge or shrink the computer. Preserve full square white opaque canvas and canvas dimensions. Preserve the circle's colors, glossy refractive edge, upper-left highlight and subtle contact shadow; expand these proportionally with its slightly larger circle. No other redesign, no text, no extra elements. One square icon image.
+
+## Previous glass artwork
+
+`minidesk-glass-source.png` is the previous artwork, edited with built-in imagegen on 2026-10-02. It reduces the circle and computer sizes while adding translucent edges, soft highlights and shadows for a layered Liquid Glass inspired appearance.
 
 ## Current glass prompt
 

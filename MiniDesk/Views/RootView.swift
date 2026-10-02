@@ -420,14 +420,19 @@ private struct CopyFeedback: ViewModifier {
                 }
             }
             .sensoryFeedback(.impact(weight: .light), trigger: trigger)
+            .onChange(of: trigger) { _, _ in
+                // Only a new copy event may show the notice. A task also restarts
+                // when this tab reappears, so it must never show an old notice.
+                withAnimation(.easeInOut(duration: 0.2)) { visible = true }
+            }
             .task(id: trigger) {
                 guard trigger > 0 else { return }
-                withAnimation(.easeInOut(duration: 0.2)) { visible = true }
                 do {
                     try await Task.sleep(for: .seconds(2))
                     withAnimation(.easeInOut(duration: 0.2)) { visible = false }
                 } catch {}
             }
+            .onDisappear { visible = false }
     }
 }
 

@@ -114,13 +114,19 @@ struct CaptureView: View {
                                 : AnyShapeStyle(Color.secondary))
                         Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
                     }.font(.system(size: 12, weight: .medium))
+                        .padding(.horizontal, 8)
+                        .frame(height: 28)
+                        .glassEffect(.regular.interactive(), in: Capsule())
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                 }
-                .controlSize(.small)
+                .buttonStyle(.plain)
                 .disabled(store.busy).accessibilityLabel("AI 润色")
                 .accessibilityValue(store.polish ? "已开启" : "已关闭")
                 .accessibilityAddTraits(store.polish ? [.isSelected] : [])
                 .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
             }
+            .sharedBackgroundVisibility(.hidden)
         }
         .onChange(of: store.draft) { _, draft in
             if !draft.isEmpty {

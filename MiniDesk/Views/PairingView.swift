@@ -51,7 +51,10 @@ struct PairingView: View {
                         }
                     }
                 }.padding(24)
-            }.background { DeskBackdrop() }
+            }
+                .scrollDismissesKeyboard(.interactively)
+                .scrollBounceBehavior(.always)
+                .background { DeskBackdrop() }
                 .navigationTitle(required ? "MiniDesk" : "配对桌面").navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     if !required {

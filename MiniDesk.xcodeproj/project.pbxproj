@@ -194,8 +194,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MiniDesk/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Mini Desk";
-				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 Mini Desk 二维码，配对你的工作区。";
+				INFOPLIST_KEY_CFBundleDisplayName = MiniDesk;
+				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 MiniDesk 二维码，配对你的工作区。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -220,8 +220,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MiniDesk/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Mini Desk";
-				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 Mini Desk 二维码，配对你的工作区。";
+				INFOPLIST_KEY_CFBundleDisplayName = MiniDesk;
+				INFOPLIST_KEY_NSCameraUsageDescription = "扫描桌面 MiniDesk 二维码，配对你的工作区。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

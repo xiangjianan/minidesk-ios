@@ -40,7 +40,7 @@ struct PairingView: View {
         .sheet(isPresented: $scanning) {
             QRScannerView { value in
                 let normalized = Pairing.normalize(value)
-                guard Pairing.isValid(normalized) else { store.error = "二维码不是有效的 Mini Desk 配对链接。"; scanning = false; return }
+                guard Pairing.isValid(normalized) else { store.error = "二维码不是有效的 MiniDesk 配对链接。"; scanning = false; return }
                 input = normalized; scanning = false
             }
         }

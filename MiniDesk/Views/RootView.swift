@@ -89,10 +89,9 @@ struct CaptureView: View {
                         .allowsHitTesting(false)
                 }
                 if showsSendSuccess {
-                    Label("已发送", systemImage: "checkmark.circle.fill")
-                        .font(.body).foregroundStyle(Color.accentColor)
+                    SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
                         .padding(.horizontal, 25).padding(.top, 8)
-                        .allowsHitTesting(false).transition(.opacity)
+                        .transition(.opacity)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -101,19 +100,20 @@ struct CaptureView: View {
         }
         .background { DeskBackdrop() }
         .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
-        .navigationTitle("Mini Desk").navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("MiniDesk").navigationBarTitleDisplayMode(.inline)
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { store.polish.toggle() } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 4) {
                         Image(systemName: "sparkles")
                             .foregroundStyle(store.polish
                                 ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple, .blue, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
                                 : AnyShapeStyle(Color.secondary))
                         Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
-                    }.font(.subheadline)
+                    }.font(.system(size: 12, weight: .medium))
                 }
+                .controlSize(.small)
                 .disabled(store.busy).accessibilityLabel("AI 润色")
                 .accessibilityValue(store.polish ? "已开启" : "已关闭")
                 .accessibilityAddTraits(store.polish ? [.isSelected] : [])
@@ -356,7 +356,14 @@ struct DesktopView: View {
             Section("数据与隐私") {
                 Text("配对码保存在本机钥匙串。草稿和发送记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；启用 AI 整理后会交由服务端模型处理。")
                     .font(.footnote).foregroundStyle(.secondary)
-                Link("打开 Mini Desk 桌面端", destination: URL(string: "https://minidesk.online")!)
+            }
+            Section {
+                Button("复制桌面端地址", systemImage: "doc.on.clipboard") {
+                    UIPasteboard.general.string = "https://minidesk.online"
+                    copyFeedbackID += 1
+                }
+            } footer: {
+                Text("请在电脑浏览器中打开 minidesk.online，再通过「手机速记」与此 iPhone 配对。")
             }
             if store.code != nil {
                 Section {
@@ -375,6 +382,21 @@ struct DesktopView: View {
     }
 }
 
+private struct SuccessNotice: View {
+    let text: String
+    let symbol: String
+    var body: some View {
+        Label(text, systemImage: symbol)
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 18).padding(.vertical, 12)
+            .glassEffect(.regular.tint(Color.accentColor), in: Capsule())
+            .shadow(color: Color.accentColor.opacity(0.2), radius: 10, y: 3)
+            .allowsHitTesting(false)
+            .accessibilityAddTraits(.updatesFrequently)
+    }
+}
+
 private struct CopyFeedback: ViewModifier {
     let trigger: Int
     @State private var visible = false
@@ -382,10 +404,8 @@ private struct CopyFeedback: ViewModifier {
         content
             .overlay(alignment: .top) {
                 if visible {
-                    Label("已复制", systemImage: "doc.on.doc")
-                        .font(.subheadline).padding(.horizontal, 16).padding(.vertical, 10)
-                        .glassEffect(.regular, in: Capsule()).padding(.top, 8)
-                        .allowsHitTesting(false).transition(.opacity)
+                    SuccessNotice(text: "文本已复制到剪贴板", symbol: "checkmark.circle.fill")
+                        .padding(.top, 8).transition(.opacity)
                 }
             }
             .sensoryFeedback(.impact(weight: .light), trigger: trigger)
@@ -393,7 +413,7 @@ private struct CopyFeedback: ViewModifier {
                 guard trigger > 0 else { return }
                 withAnimation(.easeInOut(duration: 0.2)) { visible = true }
                 do {
-                    try await Task.sleep(for: .seconds(1.3))
+                    try await Task.sleep(for: .seconds(2))
                     withAnimation(.easeInOut(duration: 0.2)) { visible = false }
                 } catch {}
             }

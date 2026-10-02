@@ -90,18 +90,18 @@ struct CaptureView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(alignment: .top) {
+                if showsSendSuccess {
+                    SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
+                        .padding(.top, 8)
+                        .transition(.opacity)
+                }
+            }
             .contentShape(Rectangle())
             .simultaneousGesture(TapGesture().onEnded { if !store.busy { editing = true } })
         }
         .background { DeskBackdrop() }
         .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
-        .overlay(alignment: .leading) {
-            if showsSendSuccess {
-                SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
-                    .padding(.leading, 25)
-                    .transition(.opacity)
-            }
-        }
         .navigationTitle("MiniDesk").navigationBarTitleDisplayMode(.inline)
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {

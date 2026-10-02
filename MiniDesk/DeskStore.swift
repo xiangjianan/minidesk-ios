@@ -20,6 +20,7 @@ struct Delivery: Identifiable, Codable {
     var message: String?
     var error: String?
     var needsPairing = false
+    var isPaired: Bool { code != nil && !needsPairing }
     private let client = RelayClient()
     private let file: URL
     init() {
@@ -46,7 +47,7 @@ struct Delivery: Identifiable, Codable {
     }
     func unpair() { PairingKeychain.clear(); code = nil; needsPairing = false }
     func send() async {
-        guard !busy, let code else { return }
+        guard !busy, isPaired, let code else { return }
         error = nil; message = nil
         let lines: [String]
         do { lines = try DraftLines.parse(draft) } catch { self.error = error.localizedDescription; return }

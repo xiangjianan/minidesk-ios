@@ -5,20 +5,30 @@ private enum DeskTab: Hashable { case history, capture, desktop }
 struct RootView: View {
     @Environment(DeskStore.self) private var store
     @State private var pairingSheet = false
-    @State private var selectedTab: DeskTab = .capture
+    @State private var selectedTab: DeskTab = .desktop
+    @State private var selectedInitialTab = false
     @State private var importedCode = ""
     @State private var captureEditing = false
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("记录", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
-                NavigationStack { HistoryView() }
+            Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
+                NavigationStack { DesktopView(showPairing: $pairingSheet) }
             }
             Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
                 NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
             }
-            Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
-                NavigationStack { DesktopView(showPairing: $pairingSheet) }
+            Tab("历史", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
+                NavigationStack { HistoryView() }
             }
+        }
+        .onAppear {
+            guard !selectedInitialTab else { return }
+            selectedInitialTab = true
+            selectedTab = store.isPaired ? .capture : .desktop
+        }
+        .onChange(of: store.isPaired) { _, paired in
+            captureEditing = false
+            selectedTab = paired ? .capture : .desktop
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: selectedTab)
         .sheet(isPresented: $pairingSheet, onDismiss: { importedCode = "" }) { PairingView() }
@@ -59,76 +69,89 @@ struct CaptureView: View {
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
-            Picker("发送类型", selection: $store.kind) {
-                ForEach(CaptureKind.allCases, id: \.self) { kind in
-                    Label(kind.title, systemImage: kind.symbol).tag(kind)
+            if store.isPaired {
+                Picker("发送类型", selection: $store.kind) {
+                    ForEach(CaptureKind.allCases, id: \.self) { kind in
+                        Label(kind.title, systemImage: kind.symbol).tag(kind)
+                    }
+                }.pickerStyle(.segmented).disabled(store.busy)
+                    .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.kind)
+                    .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
+                ZStack(alignment: .topLeading) {
+                    TextEditor(text: $store.draft)
+                        .font(.body).scrollContentBackground(.hidden)
+                        .scrollDismissesKeyboard(.interactively)
+                        .scrollBounceBehavior(.always)
+                        .focused($editing).disabled(store.busy)
+                        .accessibilityLabel("速记内容")
+                        .padding(.horizontal, 20)
+                    if store.draft.isEmpty && !showsSendSuccess {
+                        Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
+                            .font(.body).foregroundStyle(.tertiary)
+                            .padding(.horizontal, 25).padding(.top, 8)
+                            .allowsHitTesting(false)
+                    }
                 }
-            }.pickerStyle(.segmented).disabled(store.busy)
-                .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.kind)
-                .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
-            if store.code == nil || store.needsPairing {
-                Button {
-                    editing = false
-                    showPairing = true
-                } label: {
-                    Label(store.needsPairing ? "重新配对桌面" : "连接我的桌面", systemImage: "link")
-                }.buttonStyle(.glass).disabled(store.busy).padding(.bottom, 12)
-            }
-            ZStack(alignment: .topLeading) {
-                TextEditor(text: $store.draft)
-                    .font(.body).scrollContentBackground(.hidden)
-                    .scrollDismissesKeyboard(.interactively)
-                    .scrollBounceBehavior(.always)
-                    .focused($editing).disabled(store.busy)
-                    .accessibilityLabel("速记内容")
-                    .padding(.horizontal, 20)
-                if store.draft.isEmpty && !showsSendSuccess {
-                    Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
-                        .font(.body).foregroundStyle(.tertiary)
-                        .padding(.horizontal, 25).padding(.top, 8)
-                        .allowsHitTesting(false)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(alignment: .top) {
+                    if showsSendSuccess {
+                        SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
+                            .padding(.top, 8)
+                            .transition(.opacity)
+                    }
+                }
+                .contentShape(Rectangle())
+                .simultaneousGesture(TapGesture().onEnded { if store.isPaired && !store.busy { editing = true } })
+            } else {
+                ContentUnavailableView {
+                    Label(store.needsPairing ? "需要重新配对" : "配对后才能使用速记", systemImage: "lock.fill")
+                } description: {
+                    Text(store.needsPairing ? "当前配对已失效，请重新连接桌面端。" : "先连接电脑上的 MiniDesk，再输入并发送提醒或随手记。")
+                } actions: {
+                    Button(store.needsPairing ? "重新配对" : "立即配对") { showPairing = true }
+                        .buttonStyle(.glassProminent)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .overlay(alignment: .top) {
-                if showsSendSuccess {
-                    SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
-                        .padding(.top, 8)
-                        .transition(.opacity)
-                }
-            }
-            .contentShape(Rectangle())
-            .simultaneousGesture(TapGesture().onEnded { if !store.busy { editing = true } })
         }
         .background { DeskBackdrop() }
-        .safeAreaInset(edge: .bottom, spacing: 0) { editingTools }
+        .safeAreaInset(edge: .bottom, spacing: 0) { if store.isPaired { editingTools } }
         .navigationTitle("MiniDesk").navigationBarTitleDisplayMode(.inline)
         .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { store.polish.toggle() } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles")
-                            .foregroundStyle(store.polish
-                                ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple, .blue, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                : AnyShapeStyle(Color.secondary))
-                        Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
-                    }.font(.system(size: 12, weight: .medium))
-                        .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
-                        .padding(.horizontal, 12)
-                        .frame(height: 34)
-                        .glassEffect(.regular.interactive(), in: Capsule())
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
+            if store.isPaired {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { store.polish.toggle() } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(store.polish
+                                    ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple, .blue, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                    : AnyShapeStyle(Color.secondary))
+                            Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
+                        }.font(.system(size: 12, weight: .medium))
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 12)
+                            .frame(height: 34)
+                            .glassEffect(.regular.interactive(), in: Capsule())
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(store.busy).accessibilityLabel("AI 润色")
+                    .accessibilityValue(store.polish ? "已开启" : "已关闭")
+                    .accessibilityAddTraits(store.polish ? [.isSelected] : [])
+                    .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
                 }
-                .buttonStyle(.plain)
-                .disabled(store.busy).accessibilityLabel("AI 润色")
-                .accessibilityValue(store.polish ? "已开启" : "已关闭")
-                .accessibilityAddTraits(store.polish ? [.isSelected] : [])
-                .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
+                .sharedBackgroundVisibility(.hidden)
             }
-            .sharedBackgroundVisibility(.hidden)
+        }
+        .onChange(of: store.isPaired) { _, paired in
+            if !paired {
+                editing = false
+                isEditing = false
+                showsSendSuccess = false
+                showsPasteError = false
+            }
         }
         .onChange(of: store.draft) { _, draft in
             if !draft.isEmpty {
@@ -232,7 +255,7 @@ struct CaptureView: View {
         }
     }
     private func pasteDraft() {
-        guard !store.busy else { return }
+        guard store.isPaired, !store.busy else { return }
         guard let text = UIPasteboard.general.string ?? UIPasteboard.general.url?.absoluteString, !text.isEmpty else {
             withAnimation(.easeInOut(duration: 0.2)) { showsPasteError = true }
             pasteErrorID += 1

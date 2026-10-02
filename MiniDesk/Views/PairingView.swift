@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PairingView: View {
+    var required = false
     @Environment(DeskStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @Environment(\.importedPairingCode) private var imported
@@ -23,20 +24,30 @@ struct PairingView: View {
                     }.buttonStyle(.glass).controlSize(.large).disabled(store.busy)
                     if let error = store.error { Text(error).foregroundStyle(.red).font(.subheadline) }
                     Button {
-                        Task { await store.pair(input); if store.code == Pairing.normalize(input) && store.error == nil { dismiss() } }
+                        Task {
+                            await store.pair(input)
+                            if !required && store.code == Pairing.normalize(input) && store.error == nil { dismiss() }
+                        }
                     } label: {
                         HStack { if store.busy { ProgressView() }; Text(store.busy ? "验证中…" : "连接桌面") }
                             .frame(maxWidth: .infinity)
                     }.buttonStyle(.glassProminent).controlSize(.large)
                         .disabled(store.busy || !Pairing.isValid(Pairing.normalize(input)))
-                    Text("支持直接粘贴桌面生成的配对链接。一次连接一个工作区。") .font(.caption).foregroundStyle(.secondary)
+                    Text(required ? "配对成功后即可使用速记和历史记录。支持粘贴桌面生成的配对链接。" : "支持直接粘贴桌面生成的配对链接。一次连接一个工作区。") .font(.caption).foregroundStyle(.secondary)
                 }.padding(28)
             }.background { DeskBackdrop() }
-                .navigationTitle("配对桌面").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() }.disabled(store.busy) } }
+                .navigationTitle(required ? "MiniDesk" : "配对桌面").navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    if !required {
+                        ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() }.disabled(store.busy) }
+                    }
+                }
         }
         .interactiveDismissDisabled(store.busy)
         .onAppear { store.error = nil; if !imported.isEmpty { input = imported } }
+        .onChange(of: imported) { _, code in
+            if !code.isEmpty { input = code }
+        }
         .sheet(isPresented: $scanning) {
             QRScannerView { value in
                 let normalized = Pairing.normalize(value)

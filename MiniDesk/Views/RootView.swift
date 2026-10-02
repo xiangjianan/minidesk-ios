@@ -10,15 +10,21 @@ struct RootView: View {
     @State private var importedCode = ""
     @State private var captureEditing = false
     var body: some View {
-        TabView(selection: $selectedTab) {
-            Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
-                NavigationStack { DesktopView(showPairing: $pairingSheet) }
-            }
-            Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
-                NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
-            }
-            Tab("历史", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
-                NavigationStack { HistoryView() }
+        Group {
+            if store.isPaired {
+                TabView(selection: $selectedTab) {
+                    Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
+                        NavigationStack { DesktopView(showPairing: $pairingSheet) }
+                    }
+                    Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
+                        NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
+                    }
+                    Tab("历史", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
+                        NavigationStack { HistoryView() }
+                    }
+                }
+            } else {
+                PairingView(required: true)
             }
         }
         .onAppear {
@@ -29,12 +35,17 @@ struct RootView: View {
         .onChange(of: store.isPaired) { _, paired in
             captureEditing = false
             selectedTab = paired ? .capture : .desktop
+            if !paired { pairingSheet = false }
+            if paired { importedCode = "" }
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: selectedTab)
         .sheet(isPresented: $pairingSheet, onDismiss: { importedCode = "" }) { PairingView() }
         .onOpenURL { url in
             let code = Pairing.normalize(url.absoluteString)
-            if Pairing.isValid(code) { selectedTab = .capture; pairingSheet = true; importedCode = code }
+            if Pairing.isValid(code) {
+                importedCode = code
+                if store.isPaired { selectedTab = .capture; pairingSheet = true }
+            }
         }
         .environment(\.importedPairingCode, importedCode)
     }

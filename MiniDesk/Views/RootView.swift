@@ -375,34 +375,39 @@ struct DesktopView: View {
     var body: some View {
         List {
             Section {
-                VStack(spacing: 18) {
-                    Image(systemName: "desktopcomputer").font(.system(size: 56, weight: .light)).foregroundStyle(.tint)
-                        .frame(width: 110, height: 110).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
-                    Text(store.code == nil ? "把小事送回桌面" : "桌面已配对").font(.title2.bold())
-                    Text("Do less, do it well.").foregroundStyle(.secondary)
-                    if let code = store.code {
-                        Button {
-                            UIPasteboard.general.string = code
-                            copiedAddress = nil
-                            copyFeedbackID += 1
-                        } label: {
-                            Text(Pairing.masked(code)).font(.system(.body, design: .monospaced))
-                        }.buttonStyle(.plain)
-                            .accessibilityLabel("配对码")
-                            .accessibilityHint("轻点复制完整配对码")
-                    }
-                    Button(store.code == nil ? "配对桌面" : "更换配对") { showPairing = true }
-                        .buttonStyle(.glassProminent).controlSize(.large).disabled(store.busy)
-                }.frame(maxWidth: .infinity).padding(.vertical, 24)
+                VStack(spacing: 12) {
+                    Image(systemName: "desktopcomputer")
+                        .font(.system(size: 38, weight: .light)).foregroundStyle(.tint)
+                        .frame(width: 76, height: 76)
+                        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22))
+                    Text("桌面已配对").font(.title2.bold())
+                    Text("可发送提醒事项和随手记")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                }.frame(maxWidth: .infinity).padding(.vertical, 16)
             }.listRowBackground(Color.clear)
-            Section("使用方式") {
-                Label("打开桌面端工作区的「手机速记」", systemImage: "1.circle")
-                Label("扫描二维码或输入 12 位配对码", systemImage: "2.circle")
-                Label("发送提醒或随手记，桌面端同步收取", systemImage: "3.circle")
-            }
-            Section("数据与隐私") {
-                Text("配对码保存在本机钥匙串。草稿和发送记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；启用 AI 整理后会交由服务端模型处理。")
-                    .font(.footnote).foregroundStyle(.secondary)
+            Section("配对管理") {
+                if let code = store.code {
+                    Button {
+                        UIPasteboard.general.string = code
+                        copiedAddress = nil
+                        copyFeedbackID += 1
+                    } label: {
+                        HStack {
+                            Text("配对码").foregroundStyle(.primary)
+                            Spacer()
+                            Text(Pairing.masked(code))
+                                .font(.system(.subheadline, design: .monospaced))
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "doc.on.doc").font(.subheadline)
+                        }
+                    }.accessibilityHint("轻点复制完整配对码")
+                }
+                Button("更换配对", systemImage: "arrow.triangle.2.circlepath") {
+                    showPairing = true
+                }.disabled(store.busy)
+                Button("断开配对", systemImage: "xmark.circle", role: .destructive) {
+                    disconnect = true
+                }.tint(.red).disabled(store.busy)
             }
             Section {
                 Button("复制桌面端地址", systemImage: "doc.on.clipboard") {
@@ -411,13 +416,16 @@ struct DesktopView: View {
                     copiedAddress = address
                     copyFeedbackID += 1
                 }
+            } header: {
+                Text("桌面端")
             } footer: {
-                Text("请在电脑浏览器中打开 minidesk.online，再通过「手机速记」与此 iPhone 配对。")
+                Text("在电脑浏览器打开 minidesk.online。")
             }
-            if store.code != nil {
-                Section {
-                    Button("断开本机配对", role: .destructive) { disconnect = true }.disabled(store.busy)
-                } footer: { Text("只移除本机的配对信息，桌面端配对码仍然有效。") }
+            Section {
+                DisclosureGroup("数据与隐私") {
+                    Text("配对码保存在本机钥匙串，草稿和历史记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；开启 AI 润色后，内容会交给服务端模型处理。")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
             }
         }.navigationTitle("配对")
             .scrollIndicators(.hidden)

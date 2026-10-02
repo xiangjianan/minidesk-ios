@@ -428,7 +428,7 @@ private struct CopyFeedback: ViewModifier {
         content
             .overlay(alignment: .top) {
                 if visible {
-                    SuccessNotice(text: "文本已复制到剪贴板", symbol: "checkmark.circle.fill", detail: detail)
+                    SuccessNotice(text: detail == nil ? "文本已复制到剪贴板" : "已复制到剪贴板", symbol: "checkmark.circle.fill", detail: detail)
                         .padding(.top, 8).transition(.opacity)
                 }
             }

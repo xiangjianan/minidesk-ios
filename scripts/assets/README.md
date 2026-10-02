@@ -1,6 +1,14 @@
 # App icon artwork
 
-`minidesk-glass-wide-source.png` is the current artwork, edited with built-in imagegen on 2026-10-02. Only the glass circle is slightly larger; the canvas and computer dimensions are preserved.
+`minidesk-flat-glass-source.png` is the current artwork, edited with built-in imagegen on 2026-10-02. It flattens the circle's glass appearance and reduces its highlight and shadow. The export script centers the colored circle bounds on the final canvas without changing its size.
+
+## Current flat glass prompt
+
+Precise-object-edit attached MiniDesk icon. Correct the circle positioning and flatten ONLY its glass material. Preserve square full-bleed opaque white canvas, same pink-purple-blue colors, circle diameter and computer foreground dimensions/shape/position. Current source 1254x1254: circle color bounds x125..1123,y114..1098, center(624,606), canvas center(626.5,626.5). Move circle about 3px right and 20px DOWN so the circular field itself, excluding shadow, is precisely centered, with equal top/bottom and left/right margins. Keep same circle size approximately 80% canvas width. Change the circle from a bulging glossy lens into a FLAT THIN TINTED GLASS DISC: completely planar smooth gradient face, extremely subtle thin translucent edge, no domed curvature, no inflated/bubble look, no thick bevel or concentric raised rim. Remove bright upper-left glare blob; replace it with barely visible soft restrained sheen. Reduce outer cast shadow greatly to a faint close subtle shadow; no broad colored halo. Maintain pink top, lavender right, electric/periwinkle blue bottom-left. Keep white computer mark at existing size and position, preserve its readable silhouette and understated glass layer; reduce excessive highlight strength if needed for harmony. Calm refined Liquid Glass inspired app icon, no text, badge, stars or additions; no rounded outer app tile baked in. One square opaque finished icon.
+
+## Earlier enlarged glass artwork
+
+`minidesk-glass-wide-source.png` is the previous artwork, edited with built-in imagegen on 2026-10-02. Only the glass circle is slightly larger; the canvas and computer dimensions are preserved.
 
 ## Current circle adjustment prompt
 

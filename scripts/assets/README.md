@@ -1,6 +1,14 @@
 # App icon artwork
 
-`minidesk-midnight-source.png` is the current artwork, generated with the built-in imagegen tool on 2026-10-02. The user's dark icon screenshot was used as a style reference: white surround, midnight navy circle, restrained stars, and a white desktop-computer silhouette. The screenshot's lock badge and caption are excluded.
+`minidesk-purple-source.png` is the current artwork, generated with the built-in imagegen tool on 2026-10-02. It follows the user's premium-style reference: white surround, pink-purple-blue circle, and a white computer mark, excluding the lock badge and caption.
+
+## Current generation prompt
+
+Use case: logo-brand. Make one finished MiniDesk iOS app icon on square opaque full-bleed pure white canvas. Reference image is STYLE ONLY: its clean white surround and circular soft vivid gradient, pink-magenta at the top, lavender-purple in the middle/right, periwinkle/electric blue at the lower left and bottom. Match this restrained 3-color gradient with NO orange or coral. Center a large gradient circle about 86% canvas width. In place of the reference star, use MiniDesk's original simple bold WHITE DESKTOP COMPUTER silhouette: rounded rectangular monitor outline, open screen revealing gradient, short centered stem and rounded base. Computer occupies about 55% canvas width, centered, balanced, crisp, easily recognized at small sizes. Minimal flat vector-like styling, smoothly blended gradient, no sparkle decorations, no texture, no extra stars. White canvas reaches edges, iOS supplies outer corner mask; do not bake a rounded tile outline. Exclude reference purple lock badge, Chinese caption, any text, any lock or padlock, screenshots, mockups, extra UI elements, external shadows. One square production icon, 1024x1024.
+
+## Earlier midnight artwork
+
+`minidesk-midnight-source.png` is the previous artwork, generated with the built-in imagegen tool on 2026-10-02. The user's dark icon screenshot was used as a style reference: white surround, midnight navy circle, restrained stars, and a white desktop-computer silhouette. The screenshot's lock badge and caption are excluded.
 
 Export the source to an opaque 1024px iOS icon:
 

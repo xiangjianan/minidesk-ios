@@ -16,7 +16,7 @@ struct RootView: View {
             Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
                 NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
             }
-            Tab("桌面", systemImage: "desktopcomputer", value: DeskTab.desktop) {
+            Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
                 NavigationStack { DesktopView(showPairing: $pairingSheet) }
             }
         }
@@ -54,6 +54,8 @@ struct CaptureView: View {
     @State private var hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
     @State private var showsSendSuccess = false
     @State private var successFeedbackID = 0
+    @State private var showsPasteError = false
+    @State private var pasteErrorID = 0
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
@@ -80,11 +82,17 @@ struct CaptureView: View {
                     .focused($editing).disabled(store.busy)
                     .accessibilityLabel("速记内容")
                     .padding(.horizontal, 20)
-                if store.draft.isEmpty {
+                if store.draft.isEmpty && !showsSendSuccess {
                     Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
                         .font(.body).foregroundStyle(.tertiary)
                         .padding(.horizontal, 25).padding(.top, 8)
                         .allowsHitTesting(false)
+                }
+                if showsSendSuccess {
+                    Label("已发送", systemImage: "checkmark.circle.fill")
+                        .font(.body).foregroundStyle(Color.accentColor)
+                        .padding(.horizontal, 25).padding(.top, 8)
+                        .allowsHitTesting(false).transition(.opacity)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -112,6 +120,11 @@ struct CaptureView: View {
                 .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
             }
         }
+        .onChange(of: store.draft) { _, draft in
+            if !draft.isEmpty {
+                withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = false }
+            }
+        }
         .onChange(of: editing) { _, focused in
             withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
         }
@@ -122,15 +135,6 @@ struct CaptureView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { refreshClipboardAvailability() }
         }
-        .overlay(alignment: .bottom) {
-            if showsSendSuccess {
-                Label("已发送", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline).padding(.horizontal, 16).padding(.vertical, 10)
-                    .glassEffect(.regular, in: Capsule())
-                    .padding(.bottom, 66).allowsHitTesting(false)
-                    .transition(.opacity.combined(with: .scale(scale: 0.9)))
-            }
-        }
         .task(id: successFeedbackID) {
             guard successFeedbackID > 0 else { return }
             do {
@@ -138,10 +142,21 @@ struct CaptureView: View {
                 withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = false }
             } catch { /* A new send or leaving the page cancels the previous timeout. */ }
         }
-        .onDisappear { editing = false; isEditing = false; showsSendSuccess = false }
+        .task(id: pasteErrorID) {
+            guard pasteErrorID > 0 else { return }
+            do {
+                try await Task.sleep(for: .seconds(3))
+                withAnimation(.easeInOut(duration: 0.2)) { showsPasteError = false }
+            } catch {}
+        }
+        .onDisappear { editing = false; isEditing = false; showsSendSuccess = false; showsPasteError = false }
     }
     private var editingTools: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if showsPasteError {
+                Text("剪贴板没有可粘贴的文本")
+                    .font(.caption).foregroundStyle(.red).transition(.opacity)
+            }
             if let error = store.error {
                 Label(error, systemImage: "exclamationmark.circle")
                     .font(.caption).foregroundStyle(.red)
@@ -209,10 +224,13 @@ struct CaptureView: View {
     private func pasteDraft() {
         guard !store.busy else { return }
         guard let text = UIPasteboard.general.string ?? UIPasteboard.general.url?.absoluteString, !text.isEmpty else {
-            store.error = "剪贴板中没有可粘贴的文本。"
+            withAnimation(.easeInOut(duration: 0.2)) { showsPasteError = true }
+            pasteErrorID += 1
+            refreshClipboardAvailability(animated: true)
             return
         }
         store.error = nil
+        withAnimation(.easeInOut(duration: 0.2)) { showsPasteError = false }
         store.draft += (store.draft.isEmpty || store.draft.hasSuffix("\n") ? "" : "\n") + text
     }
     private var canSend: Bool {
@@ -235,6 +253,7 @@ struct CaptureView: View {
 struct HistoryView: View {
     @Environment(DeskStore.self) private var store
     @State private var confirmClear = false
+    @State private var copyFeedbackID = 0
     var body: some View {
         List {
             Section {
@@ -251,7 +270,7 @@ struct HistoryView: View {
                         Spacer()
                         Text(record.accepted ? "中转已接收" : "待重试").font(.caption).foregroundStyle(record.accepted ? .green : .orange)
                     }
-                    Text(record.payload.text).textSelection(.enabled)
+                    Text(record.payload.text)
                     HStack {
                         Text(record.date, formatter: Self.recordDateFormatter).font(.caption).foregroundStyle(.secondary)
                         Spacer()
@@ -265,15 +284,23 @@ struct HistoryView: View {
                         Text("请连接发送时的桌面后重试。") .font(.caption).foregroundStyle(.secondary)
                     }
                 }.padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        UIPasteboard.general.string = record.payload.text
+                        copyFeedbackID += 1
+                    }
+                    .accessibilityHint("轻点复制内容")
+                    .accessibilityAddTraits(.isButton)
                     .swipeActions {
                         Button("删除", role: .destructive) { store.discard(record.id) }.disabled(store.busy)
                     }
             }
         }
         .navigationTitle("发送记录")
+        .modifier(CopyFeedback(trigger: copyFeedbackID))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("清除已接收", systemImage: "trash") { confirmClear = true }
+                Button("清除已接收", systemImage: "trash") { confirmClear = true }.tint(.red)
                     .disabled(store.busy || !store.records.contains { $0.accepted })
             }
         }
@@ -298,6 +325,7 @@ struct DesktopView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
     @State private var disconnect = false
+    @State private var copyFeedbackID = 0
     var body: some View {
         List {
             Section {
@@ -306,7 +334,16 @@ struct DesktopView: View {
                         .frame(width: 110, height: 110).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
                     Text(store.code == nil ? "把小事送回桌面" : "桌面已配对").font(.title2.bold())
                     Text("Do less, do it well.").foregroundStyle(.secondary)
-                    if let code = store.code { Text(Pairing.masked(code)).font(.system(.body, design: .monospaced)) }
+                    if let code = store.code {
+                        Button {
+                            UIPasteboard.general.string = code
+                            copyFeedbackID += 1
+                        } label: {
+                            Text(Pairing.masked(code)).font(.system(.body, design: .monospaced))
+                        }.buttonStyle(.plain)
+                            .accessibilityLabel("配对码")
+                            .accessibilityHint("轻点复制完整配对码")
+                    }
                     Button(store.code == nil ? "配对桌面" : "更换配对") { showPairing = true }
                         .buttonStyle(.glassProminent).controlSize(.large).disabled(store.busy)
                 }.frame(maxWidth: .infinity).padding(.vertical, 24)
@@ -326,12 +363,39 @@ struct DesktopView: View {
                     Button("断开本机配对", role: .destructive) { disconnect = true }.disabled(store.busy)
                 } footer: { Text("只移除本机的配对信息，桌面端配对码仍然有效。") }
             }
-        }.navigationTitle("我的桌面")
+        }.navigationTitle("配对")
+            .scrollIndicators(.hidden)
+            .modifier(CopyFeedback(trigger: copyFeedbackID))
             .alert("断开本机配对？", isPresented: $disconnect) {
                 Button("取消", role: .cancel) {}
                 Button("断开配对", role: .destructive) { store.unpair() }
             } message: {
                 Text("只移除本机的配对信息，桌面端配对码仍然有效。")
+            }
+    }
+}
+
+private struct CopyFeedback: ViewModifier {
+    let trigger: Int
+    @State private var visible = false
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .top) {
+                if visible {
+                    Label("已复制", systemImage: "doc.on.doc")
+                        .font(.subheadline).padding(.horizontal, 16).padding(.vertical, 10)
+                        .glassEffect(.regular, in: Capsule()).padding(.top, 8)
+                        .allowsHitTesting(false).transition(.opacity)
+                }
+            }
+            .sensoryFeedback(.impact(weight: .light), trigger: trigger)
+            .task(id: trigger) {
+                guard trigger > 0 else { return }
+                withAnimation(.easeInOut(duration: 0.2)) { visible = true }
+                do {
+                    try await Task.sleep(for: .seconds(1.3))
+                    withAnimation(.easeInOut(duration: 0.2)) { visible = false }
+                } catch {}
             }
     }
 }

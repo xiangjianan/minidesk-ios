@@ -13,7 +13,7 @@ Mini Desk 的原生移动伴侣：先记下来，回到桌面再继续。
 - 自动保存草稿，保留本机发送记录和失败条目。
 - 速记采用整页备忘录编辑：点击空白处输入，下滑交互式收起键盘，发送后清空文本。
 - 提醒/随手记切换位于顶部，键盘出现时隐藏底部标签栏，历史消息仅在「记录」页展示。
-- 标签顺序为「记录 / 速记 / 桌面」，启动默认进入速记，切换标签提供轻微触觉反馈。
+- 标签顺序为「记录 / 速记 / 配对」，启动默认进入速记，切换标签提供轻微触觉反馈。
 - 失败后手动重试，沿用原消息 ID 和原工作区；更换配对不会把旧消息误发给新桌面。
 - 系统 Liquid Glass 标签栏、工具栏、`.glass` / `.glassProminent` 按钮及少量 `glassEffect` 装饰。
 - 跟随系统深浅色，支持 Dynamic Type、VoiceOver、iPhone 与 iPad。
@@ -23,7 +23,7 @@ Mini Desk 的原生移动伴侣：先记下来，回到桌面再继续。
 1. 用 **Xcode 26 或更新版本**打开 `MiniDesk.xcodeproj`（本项目使用 Xcode 27 / iOS 27 SDK 构建验证）。最低系统为 iOS 26。
 2. 选择 `MiniDesk` target，在 Signing & Capabilities 中选择自己的 Team。必要时将 Bundle Identifier 改为个人唯一值。
 3. 选择 iPhone / iPad 或已安装运行时的模拟器，运行。
-4. 在 [桌面 Mini Desk](https://minidesk.online) 的工作区菜单打开「手机速记」，获取码或二维码。在 App 的「桌面」页配对。
+4. 在 [桌面 Mini Desk](https://minidesk.online) 的工作区菜单打开「手机速记」，获取码或二维码。在 App 的「配对」页配对。
 5. 输入内容，选择提醒或随手记，发送。桌面端定时收取，或在桌面执行手动同步。
 
 扫码需真机相机；没有相机的模拟器请手动输入配对码。现有 HTTPS 配对链接支持扫码及粘贴，未配置 Universal Links；自定义链接 `minidesk://pair#inbox=你的配对码` 可直接打开 App 的配对页。

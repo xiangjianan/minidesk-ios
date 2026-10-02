@@ -29,11 +29,7 @@ struct PairingView: View {
                             Label("扫描桌面二维码", systemImage: "qrcode.viewfinder")
                                 .frame(maxWidth: .infinity)
                         }.buttonStyle(.glass).controlSize(.large).disabled(store.busy)
-                        TextField("输入 12 位配对码或粘贴链接", text: $input)
-                            .font(.system(.body, design: .monospaced))
-                            .textInputAutocapitalization(.characters)
-                            .autocorrectionDisabled().textFieldStyle(.roundedBorder)
-                            .accessibilityLabel("配对码或配对链接").disabled(store.busy)
+                        PairingCodeField(input: $input).disabled(store.busy)
                         Button {
                             Task {
                                 await store.pair(input)
@@ -94,4 +90,52 @@ struct PairingView: View {
         }.frame(maxWidth: .infinity, alignment: .leading)
     }
 
+}
+
+private struct PairingCodeField: View {
+    @Binding var input: String
+    @FocusState private var focused: Bool
+
+    private var characters: [Character] { Array(Pairing.normalize(input).prefix(12)) }
+
+    var body: some View {
+        TextField("", text: $input)
+            .keyboardType(.asciiCapable)
+            .textInputAutocapitalization(.characters)
+            .autocorrectionDisabled()
+            .foregroundStyle(.clear).tint(.clear)
+            .focused($focused)
+            .frame(height: 48)
+            .overlay {
+                HStack(spacing: 4) {
+                    ForEach(0..<3, id: \.self) { group in
+                        if group > 0 {
+                            Text("–").font(.caption).foregroundStyle(.secondary)
+                                .frame(width: 6)
+                        }
+                        HStack(spacing: 3) {
+                            ForEach(0..<4, id: \.self) { offset in
+                                let index = group * 4 + offset
+                                let active = focused && index == min(characters.count, 11)
+                                Text(index < characters.count ? String(characters[index]) : " ")
+                                    .font(.system(size: 16, weight: .semibold, design: .monospaced))
+                                    .foregroundStyle(.primary)
+                                    .frame(maxWidth: .infinity).frame(height: 44)
+                                    .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 7))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 7)
+                                            .strokeBorder(active ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: active ? 2 : 1)
+                                    }
+                            }
+                        }.frame(maxWidth: .infinity)
+                    }
+                }.allowsHitTesting(false).accessibilityHidden(true)
+            }
+            .accessibilityLabel("12 位配对码，也可粘贴配对链接")
+            .accessibilityValue(Pairing.normalize(input))
+            .onChange(of: input) { _, value in
+                let normalized = String(Pairing.normalize(value).replacingOccurrences(of: "-", with: "").prefix(12))
+                if input != normalized { input = normalized }
+            }
+    }
 }

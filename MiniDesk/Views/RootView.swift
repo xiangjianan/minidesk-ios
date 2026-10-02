@@ -405,8 +405,11 @@ struct DesktopView: View {
                 Button("更换配对", systemImage: "arrow.triangle.2.circlepath") {
                     showPairing = true
                 }.disabled(store.busy)
-                Button("断开配对", systemImage: "xmark.circle", role: .destructive) {
+                Button(role: .destructive) {
                     disconnect = true
+                } label: {
+                    Label("断开配对", systemImage: "xmark.circle")
+                        .foregroundStyle(.red)
                 }.tint(.red).disabled(store.busy)
             }
             Section {

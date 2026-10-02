@@ -454,7 +454,7 @@ private struct SuccessNotice: View {
     }
 }
 
-private struct CopyFeedback: ViewModifier {
+struct CopyFeedback: ViewModifier {
     let trigger: Int
     var detail: String? = nil
     @State private var visible = false

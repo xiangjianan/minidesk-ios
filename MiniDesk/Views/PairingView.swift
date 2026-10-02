@@ -7,6 +7,8 @@ struct PairingView: View {
     @Environment(\.importedPairingCode) private var imported
     @State private var input = ""
     @State private var scanning = false
+    @State private var copyFeedbackID = 0
+    private let desktopAddress = "https://minidesk.online"
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -15,6 +17,19 @@ struct PairingView: View {
                         .frame(width: 90, height: 90).glassEffect(.regular, in: RoundedRectangle(cornerRadius: 26))
                     Text("和你的桌面\n建立连接。") .font(.largeTitle.bold())
                     Text("打开桌面端工作区菜单中的「手机速记」，获取二维码或 12 位配对码。") .foregroundStyle(.secondary)
+                    if required {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Button {
+                                UIPasteboard.general.string = desktopAddress
+                                copyFeedbackID += 1
+                            } label: {
+                                Label("复制桌面端地址", systemImage: "doc.on.clipboard")
+                                    .frame(maxWidth: .infinity)
+                            }.buttonStyle(.glass).controlSize(.large)
+                            Text("请在电脑浏览器中打开 minidesk.online，再获取配对码或二维码。")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
                     TextField("例如 ABCD EFGH 2345", text: $input)
                         .font(.system(.title3, design: .monospaced)).textInputAutocapitalization(.characters)
                         .autocorrectionDisabled().textFieldStyle(.roundedBorder)
@@ -43,6 +58,7 @@ struct PairingView: View {
                     }
                 }
         }
+        .modifier(CopyFeedback(trigger: copyFeedbackID, detail: desktopAddress))
         .interactiveDismissDisabled(store.busy)
         .onAppear { store.error = nil; if !imported.isEmpty { input = imported } }
         .onChange(of: imported) { _, code in

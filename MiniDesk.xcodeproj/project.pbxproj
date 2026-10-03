@@ -15,6 +15,7 @@
 		5B71D6B29B792735E39B95D1 /* AnimatedGlassTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33C81BABACB1586A24161EC /* AnimatedGlassTool.swift */; };
 		71C5918D3A440A7190D3C6A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 18B9B7753417F00BF947E915 /* InfoPlist.strings */; };
 		A31742410C6FA9AFC8D2F718 /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59BDF5FD7AF2058458EEDB19 /* Protocol.swift */; };
+		C4D75C82CE3A76A6DB903D87 /* DraftUndoHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBA3029551586D0F874BBC14 /* DraftUndoHistory.swift */; };
 		C5DE40A75676B513E097EA0B /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */; };
 		C732B4BB5EC0F682C5A0B08C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */; };
 		D93CA9E733F202FE129F23A9 /* MiniDeskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89595C73FC5DA9886D8946E1 /* MiniDeskApp.swift */; };
@@ -35,6 +36,7 @@
 		B33C81BABACB1586A24161EC /* AnimatedGlassTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGlassTool.swift; sourceTree = "<group>"; };
 		BE8D5744DDA76477B36D5C46 /* DeskStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeskStore.swift; sourceTree = "<group>"; };
 		DD8A98C7983BEC6475286B43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EBA3029551586D0F874BBC14 /* DraftUndoHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DraftUndoHistory.swift; sourceTree = "<group>"; };
 		ED8DF68A2C9C32D634E724A4 /* MiniDesk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = MiniDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -66,6 +68,7 @@
 		3911565B269130BA4D5CFCDA /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				EBA3029551586D0F874BBC14 /* DraftUndoHistory.swift */,
 				59BDF5FD7AF2058458EEDB19 /* Protocol.swift */,
 			);
 			path = Core;
@@ -165,6 +168,7 @@
 			files = (
 				5B71D6B29B792735E39B95D1 /* AnimatedGlassTool.swift in Sources */,
 				343EB548261F65CDAFA2C077 /* DeskStore.swift in Sources */,
+				C4D75C82CE3A76A6DB903D87 /* DraftUndoHistory.swift in Sources */,
 				F93857D9F5AE4C6915EEA177 /* Keychain.swift in Sources */,
 				D93CA9E733F202FE129F23A9 /* MiniDeskApp.swift in Sources */,
 				1E98868AB89905C5D1104C5D /* PairingView.swift in Sources */,

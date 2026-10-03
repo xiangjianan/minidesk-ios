@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// Native text editing keeps UIKit's grouped typing undo history.
+/// Record committed edits so shaking never undoes an entire typing session.
 struct ShakeUndoTextEditor: UIViewRepresentable {
     @Binding var text: String
     @Binding var editing: Bool
@@ -28,6 +28,7 @@ struct ShakeUndoTextEditor: UIViewRepresentable {
         // Don't replace text during typing: doing so destroys the native undo stack.
         if view.text != text {
             view.text = text
+            view.history.reset(to: text)
             view.undoManager?.removeAllActions()
         }
         view.isEditable = !disabled
@@ -41,19 +42,27 @@ struct ShakeUndoTextEditor: UIViewRepresentable {
     final class Coordinator: NSObject, UITextViewDelegate {
         var parent: ShakeUndoTextEditor
         init(_ parent: ShakeUndoTextEditor) { self.parent = parent }
-        func textViewDidChange(_ textView: UITextView) { parent.text = textView.text }
+        func textViewDidChange(_ textView: UITextView) {
+            if let view = textView as? ShakeUndoTextView, view.markedTextRange == nil {
+                view.history.record(view.text)
+            }
+            parent.text = textView.text
+        }
         func textViewDidBeginEditing(_ textView: UITextView) { parent.editing = true }
         func textViewDidEndEditing(_ textView: UITextView) { parent.editing = false }
     }
 }
 
 final class ShakeUndoTextView: UITextView {
+    var history = DraftUndoHistory()
+
     override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
-        guard motion == .motionShake, isFirstResponder, isEditable,
-              let manager = undoManager, manager.canUndo else {
+        guard motion == .motionShake else {
             super.motionEnded(motion, with: event)
             return
         }
+        // Do not fall back to UIKit's whole-session undo when our history is empty.
+        guard isFirstResponder, isEditable, markedTextRange == nil, history.canUndo else { return }
         var responder: UIResponder? = self
         while let current = responder, !(current is UIViewController) { responder = current.next }
         guard let controller = responder as? UIViewController,
@@ -61,8 +70,11 @@ final class ShakeUndoTextView: UITextView {
         let alert = UIAlertController(title: "撤销输入？", message: nil, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel))
         alert.addAction(UIAlertAction(title: "撤销", style: .default) { [weak self] _ in
-            guard let self, self.undoManager?.canUndo == true else { return }
-            self.undoManager?.undo()
+            guard let self, let previous = self.history.undo() else { return }
+            self.text = previous
+            self.selectedRange = NSRange(location: (previous as NSString).length, length: 0)
+            self.undoManager?.removeAllActions()
+            self.delegate?.textViewDidChange?(self)
         })
         controller.present(alert, animated: true)
     }

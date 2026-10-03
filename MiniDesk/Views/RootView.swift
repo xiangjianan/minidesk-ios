@@ -77,6 +77,8 @@ struct CaptureView: View {
     @State private var successFeedbackID = 0
     @State private var showsPasteError = false
     @State private var pasteErrorID = 0
+    @State private var clearedDraft: String?
+    @State private var clearUndoDeadline: Date?
     var body: some View {
         @Bindable var store = store
         VStack(spacing: 0) {
@@ -174,6 +176,7 @@ struct CaptureView: View {
         }
         .onChange(of: store.draft) { _, draft in
             if !draft.isEmpty {
+                discardClearUndo()
                 withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = false }
             }
         }
@@ -201,7 +204,17 @@ struct CaptureView: View {
                 withAnimation(.easeInOut(duration: 0.2)) { showsPasteError = false }
             } catch {}
         }
-        .onDisappear { editing = false; isEditing = false; showsSendSuccess = false; showsPasteError = false }
+        .task(id: clearUndoDeadline) {
+            guard let deadline = clearUndoDeadline else { return }
+            do {
+                try await Task.sleep(for: .seconds(max(0, deadline.timeIntervalSinceNow)))
+                discardClearUndo()
+            } catch {}
+        }
+        .onDisappear {
+            editing = false; isEditing = false; showsSendSuccess = false; showsPasteError = false
+            discardClearUndo()
+        }
     }
     private var editingTools: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -215,12 +228,21 @@ struct CaptureView: View {
             }
             Group {
                 HStack(spacing: 8) {
-                    animatedTool(visible: !store.draft.isEmpty) {
-                        Button { store.draft = "" } label: {
-                            toolSurface(destructive: true) { Image(systemName: "trash") }
-                        }.buttonStyle(.plain).allowsHitTesting(!store.busy)
-                            .accessibilityLabel("清空草稿")
-                    }
+                    ZStack {
+                        animatedTool(visible: !store.draft.isEmpty) {
+                            Button(action: clearDraft) {
+                                toolSurface(destructive: true) { Image(systemName: "trash") }
+                            }.buttonStyle(.plain).allowsHitTesting(!store.busy)
+                                .accessibilityLabel("清空草稿")
+                        }
+                        animatedTool(visible: clearedDraft != nil && store.draft.isEmpty) {
+                            Button(action: restoreClearedDraft) {
+                                toolSurface { Image(systemName: "arrow.uturn.backward") }
+                            }.buttonStyle(.plain).allowsHitTesting(!store.busy)
+                                .accessibilityLabel("撤销清空")
+                                .accessibilityHint("恢复刚刚清空的文本")
+                        }
+                    }.frame(width: 58, height: 48)
                     Spacer(minLength: 8)
                     animatedTool(visible: hasClipboardText) {
                         Button(action: pasteDraft) {
@@ -273,6 +295,27 @@ struct CaptureView: View {
             hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
         }
     }
+    private func clearDraft() {
+        guard !store.busy, !store.draft.isEmpty else { return }
+        clearedDraft = store.draft
+        clearUndoDeadline = Date().addingTimeInterval(5)
+        store.draft = ""
+    }
+    private func restoreClearedDraft() {
+        guard !store.busy, store.draft.isEmpty,
+              let deadline = clearUndoDeadline, deadline > Date(),
+              let saved = clearedDraft else {
+            discardClearUndo()
+            return
+        }
+        discardClearUndo()
+        store.draft = saved
+    }
+    private func discardClearUndo() {
+        clearedDraft = nil
+        clearUndoDeadline = nil
+    }
+
     private func pasteDraft() {
         guard store.isPaired, !store.busy else { return }
         guard let text = UIPasteboard.general.string ?? UIPasteboard.general.url?.absoluteString, !text.isEmpty else {

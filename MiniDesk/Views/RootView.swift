@@ -69,7 +69,7 @@ struct CaptureView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
     @Binding var isEditing: Bool
-    @FocusState private var editing: Bool
+    @State private var editing = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var hasClipboardText = UIPasteboard.general.hasStrings || UIPasteboard.general.hasURLs
@@ -89,12 +89,7 @@ struct CaptureView: View {
                     .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.kind)
                     .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
                 ZStack(alignment: .topLeading) {
-                    TextEditor(text: $store.draft)
-                        .font(.body).scrollContentBackground(.hidden)
-                        .scrollDismissesKeyboard(.interactively)
-                        .scrollBounceBehavior(.always)
-                        .focused($editing).disabled(store.busy)
-                        .accessibilityLabel("速记内容")
+                    ShakeUndoTextEditor(text: $store.draft, editing: $editing, disabled: store.busy)
                         .padding(.horizontal, 20)
                     if store.draft.isEmpty && !showsSendSuccess {
                         Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")

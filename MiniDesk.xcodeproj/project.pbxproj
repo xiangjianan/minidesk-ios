@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		061F5535FA52475436FB32C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DD8A98C7983BEC6475286B43 /* Assets.xcassets */; };
+		118C983664FEADE5C6C91BDA /* ShakeUndoTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF902006E5C0915DBF886C0 /* ShakeUndoTextEditor.swift */; };
 		1E98868AB89905C5D1104C5D /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D76D2B5C6CCDE1069089807 /* PairingView.swift */; };
 		343EB548261F65CDAFA2C077 /* DeskStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8D5744DDA76477B36D5C46 /* DeskStore.swift */; };
 		51BEDB48259E0BCABC8DFE06 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91BEADB9F3ADF71172CCAEB7 /* RootView.swift */; };
@@ -24,6 +25,7 @@
 		1D76D2B5C6CCDE1069089807 /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
 		2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		31436D7F03532ABBA52F993F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		4FF902006E5C0915DBF886C0 /* ShakeUndoTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeUndoTextEditor.swift; sourceTree = "<group>"; };
 		59BDF5FD7AF2058458EEDB19 /* Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
 		5F86641291CAE78D4BA91012 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		63EB810D91B3AA44C3EBB102 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				1D76D2B5C6CCDE1069089807 /* PairingView.swift */,
 				2D7672B3CADA016D1A5373F0 /* QRScannerView.swift */,
 				91BEADB9F3ADF71172CCAEB7 /* RootView.swift */,
+				4FF902006E5C0915DBF886C0 /* ShakeUndoTextEditor.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 				A31742410C6FA9AFC8D2F718 /* Protocol.swift in Sources */,
 				C5DE40A75676B513E097EA0B /* QRScannerView.swift in Sources */,
 				51BEDB48259E0BCABC8DFE06 /* RootView.swift in Sources */,
+				118C983664FEADE5C6C91BDA /* ShakeUndoTextEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

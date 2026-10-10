@@ -515,7 +515,11 @@ private struct SuccessNotice: View {
         }
             .foregroundStyle(.white)
             .padding(.horizontal, 18).padding(.vertical, 12)
-            .glassEffect(.regular.tint(Color.accentColor.opacity(0.45)), in: Capsule())
+            .background {
+                Capsule().fill(.clear)
+                    .glassEffect(.regular.tint(Color.accentColor), in: Capsule())
+                    .opacity(0.85)
+            }
             .shadow(color: Color.accentColor.opacity(0.12), radius: 10, y: 3)
             .allowsHitTesting(false)
             .accessibilityAddTraits(.updatesFrequently)

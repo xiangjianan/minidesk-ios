@@ -8,7 +8,6 @@ struct RootView: View {
     @State private var selectedTab: DeskTab = .desktop
     @State private var selectedInitialTab = false
     @State private var importedCode = ""
-    @State private var captureEditing = false
     var body: some View {
         Group {
             if store.isPaired {
@@ -17,7 +16,7 @@ struct RootView: View {
                         NavigationStack { DesktopView(showPairing: $pairingSheet) }
                     }
                     Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
-                        NavigationStack { CaptureView(showPairing: $pairingSheet, isEditing: $captureEditing) }
+                        NavigationStack { CaptureView(showPairing: $pairingSheet) }
                     }
                     Tab("历史", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
                         NavigationStack { HistoryView() }
@@ -33,7 +32,6 @@ struct RootView: View {
             selectedTab = store.isPaired ? .capture : .desktop
         }
         .onChange(of: store.isPaired) { _, paired in
-            captureEditing = false
             selectedTab = paired ? .capture : .desktop
             if !paired { pairingSheet = false }
             if paired { importedCode = "" }
@@ -68,7 +66,6 @@ struct DeskBackdrop: View {
 struct CaptureView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
-    @Binding var isEditing: Bool
     @State private var editing = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -92,6 +89,7 @@ struct CaptureView: View {
                     .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 16)
                 ZStack(alignment: .topLeading) {
                     ShakeUndoTextEditor(text: $store.draft, editing: $editing, disabled: store.busy)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.horizontal, 20)
                     if store.draft.isEmpty && !showsSendSuccess {
                         Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
@@ -134,10 +132,11 @@ struct CaptureView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if store.isPaired { editingTools }
+        }
         .background { DeskBackdrop() }
-        .safeAreaInset(edge: .bottom, spacing: 0) { if store.isPaired { editingTools } }
         .navigationTitle("MiniDesk").navigationBarTitleDisplayMode(.inline)
-        .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
         .toolbar {
             if store.isPaired {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -169,7 +168,6 @@ struct CaptureView: View {
         .onChange(of: store.isPaired) { _, paired in
             if !paired {
                 editing = false
-                isEditing = false
                 showsSendSuccess = false
                 showsPasteError = false
             }
@@ -179,9 +177,6 @@ struct CaptureView: View {
                 discardClearUndo()
                 withAnimation(.easeOut(duration: 0.2)) { showsSendSuccess = false }
             }
-        }
-        .onChange(of: editing) { _, focused in
-            withAnimation(.easeInOut(duration: 0.25)) { isEditing = focused }
         }
         .onAppear { refreshClipboardAvailability() }
         .onReceive(NotificationCenter.default.publisher(for: UIPasteboard.changedNotification)) { _ in
@@ -212,7 +207,7 @@ struct CaptureView: View {
             } catch {}
         }
         .onDisappear {
-            editing = false; isEditing = false; showsSendSuccess = false; showsPasteError = false
+            editing = false; showsSendSuccess = false; showsPasteError = false
             discardClearUndo()
         }
     }
@@ -265,7 +260,7 @@ struct CaptureView: View {
                 }
                 .overlay(alignment: .center) {
                     animatedTool(visible: editing) {
-                        Button { editing = false } label: {
+                        Button(action: dismissKeyboard) {
                             toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
                         }.buttonStyle(.plain).accessibilityLabel("收起键盘")
                     }
@@ -274,8 +269,12 @@ struct CaptureView: View {
         }.padding(.horizontal, 20).padding(.vertical, 8)
     }
     private func animatedTool<Content: View>(visible: Bool, @ViewBuilder content: () -> Content) -> some View {
-        AnimatedGlassTool(visible: visible, reduceMotion: reduceMotion, content: content())
+        content()
             .frame(width: 58, height: 48)
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(visible)
+            .accessibilityHidden(!visible)
+            .animation(.easeInOut(duration: reduceMotion ? 0.12 : 0.22), value: visible)
     }
     private var toolAnimation: Animation {
         reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.34, dampingFraction: 0.82)
@@ -332,9 +331,13 @@ struct CaptureView: View {
         !store.busy && store.code != nil && !store.needsPairing &&
         !store.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    private func dismissKeyboard() {
+        editing = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
     private func sendDraft() {
         guard canSend else { return }
-        editing = false
+        dismissKeyboard()
         Task {
             await store.send()
             if store.error == nil, store.message != nil {

@@ -10,7 +10,7 @@ Built with SwiftUI for mobile only. Compatible with the current mobile capture p
 
 - Pair by scanning a desktop QR code, entering a 12-character pairing code, or pasting a pairing link.
 - Validate server status before pairing and store the pairing code in the device Keychain.
-- Send reminders or quick notes, one item per line. Oversized text is rejected instead of silently truncated.
+- Send reminders (one item per line) or quick notes (one item per draft, preserving line breaks). Oversized text is rejected instead of silently truncated.
 - Send the original text by default, with optional server-side AI cleanup and reminder time recognition.
 - Automatically save drafts and retain local send history and failed items.
 - Capture uses a full-page note editor: tap empty space to type, swipe down to dismiss the keyboard interactively, and clear the text after sending.

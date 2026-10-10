@@ -369,6 +369,9 @@ struct HistoryView: View {
                         Text(record.accepted ? "中转已接收" : "待重试").font(.caption).foregroundStyle(record.accepted ? .green : .orange)
                     }
                     Text(record.payload.text)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                     HStack {
                         Text(record.date, formatter: Self.recordDateFormatter).font(.caption).foregroundStyle(.secondary)
                         Spacer()
@@ -512,7 +515,7 @@ private struct SuccessNotice: View {
         }
             .foregroundStyle(.white)
             .padding(.horizontal, 18).padding(.vertical, 12)
-            .glassEffect(.regular.tint(Color.accentColor), in: Capsule())
+            .glassEffect(.regular.tint(Color.accentColor.opacity(0.7)), in: Capsule())
             .shadow(color: Color.accentColor.opacity(0.2), radius: 10, y: 3)
             .allowsHitTesting(false)
             .accessibilityAddTraits(.updatesFrequently)

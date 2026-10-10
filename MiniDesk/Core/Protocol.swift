@@ -59,7 +59,7 @@ public enum RelayError: Error, LocalizedError, Equatable {
         case .unknown: "配对码尚未注册，请先在桌面端打开手机速记配对。"
         case .rateLimited: "发送太频繁，请稍后重试。"
         case .full: "桌面收件箱已满，请打开桌面端接收后重试。"
-        case .tooLarge: "内容太长，每行最多 500 个字符。"
+        case .tooLarge: "内容太长，每条最多 500 个字符。"
         case .invalidRequest: "发送内容格式有误。"
         case .server: "中转服务暂时不可用，请稍后重试。"
         case .network: "无法连接中转服务，请检查网络后重试。"
@@ -104,6 +104,14 @@ public struct RelayClient: Sendable {
 }
 
 public enum DraftLines {
+    public static func parse(_ text: String, kind: CaptureKind) throws -> [String] {
+        guard kind == .note else { return try parse(text) }
+        let note = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !note.isEmpty else { return [] }
+        guard note.utf16.count <= 500 else { throw RelayError.tooLarge }
+        return [note]
+    }
+
     public static func parse(_ text: String) throws -> [String] {
         let lines = text.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
         // Web's limit counts UTF-16 code units, not Swift grapheme clusters.

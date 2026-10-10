@@ -50,7 +50,7 @@ struct Delivery: Identifiable, Codable {
         guard !busy, isPaired, let code else { return }
         error = nil; message = nil
         let lines: [String]
-        do { lines = try DraftLines.parse(draft) } catch { self.error = error.localizedDescription; return }
+        do { lines = try DraftLines.parse(draft, kind: kind) } catch { self.error = error.localizedDescription; return }
         guard !lines.isEmpty else { return }
         busy = true; defer { busy = false }
         let entries = lines.map { Delivery(id: UUID().uuidString, hash: Pairing.hash(code), payload: CapturePayload(kind: kind, text: $0, polish: polish)) }

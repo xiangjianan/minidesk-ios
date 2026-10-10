@@ -40,3 +40,17 @@ import Testing
     #expect(RelayError.status(409) == .full)
     #expect(RelayError.status(413) == .tooLarge)
 }
+
+@Test func multilineNotesStayTogether() throws {
+    let text = " 第一行\n\n  第二行\r\n第三行 \n"
+    #expect(try DraftLines.parse(text, kind: .note) == ["第一行\n\n  第二行\r\n第三行"])
+    #expect(try DraftLines.parse(text, kind: .todo) == ["第一行", "第二行", "第三行"])
+    #expect(try DraftLines.parse(" \n\t ", kind: .note).isEmpty)
+    #expect(try DraftLines.parse(String(repeating: "a", count: 500), kind: .note).count == 1)
+    #expect(throws: RelayError.tooLarge) {
+        try DraftLines.parse(String(repeating: "a", count: 250) + "\n" + String(repeating: "b", count: 250), kind: .note)
+    }
+    #expect(throws: RelayError.tooLarge) {
+        try DraftLines.parse(String(repeating: "😀", count: 251), kind: .note)
+    }
+}

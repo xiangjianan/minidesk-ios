@@ -1,5 +1,7 @@
 # Mini Desk for iOS
 
+**简体中文** | [English](README.en.md)
+
 Mini Desk 的原生移动伴侣：先记下来，回到桌面再继续。
 
 使用 SwiftUI 构建，仅实现移动端。兼容 [Mini Desk 桌面端](https://github.com/xiangjianan/mini-desk) 当前手机速记协议，不需要修改桌面端或服务端。

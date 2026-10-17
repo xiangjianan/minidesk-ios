@@ -29,6 +29,23 @@ struct Delivery: Identifiable, Codable {
         file = URL.applicationSupportDirectory.appendingPathComponent("deliveries.json")
         if let data = try? Data(contentsOf: file), let saved = try? JSONDecoder().decode([Delivery].self, from: data) { records = saved }
         if let code, !Pairing.isValid(code) { self.code = nil }
+        #if DEBUG && targetEnvironment(simulator)
+        // In-memory fixtures for store screenshots; never included in device or Release builds.
+        if let scene = ProcessInfo.processInfo.environment["MINIDESK_SCREENSHOT_SCENE"] {
+            code = "7K3M9Q2R5T8V"
+            polish = false
+            kind = scene == "note" ? .note : .todo
+            draft = scene == "note"
+                ? "周末的小计划\n\n找一家安静的咖啡馆，读完手边的书。\n沿着河边走走，把路上想到的事记下来。\n\n回到电脑前，再慢慢整理。"
+                : "明天上午十点整理读书笔记\n周五下班后去取快递\n周末给阳台的植物浇水"
+            let date = Date(timeIntervalSince1970: 1_792_224_000)
+            records = [
+                Delivery(id: "screenshot-note", hash: Pairing.hash(code!), payload: CapturePayload(kind: .note, text: "灵感备忘\n把零散的想法先记下来，回到桌面再整理。", polish: false, date: date), accepted: true),
+                Delivery(id: "screenshot-todo-1", hash: Pairing.hash(code!), payload: CapturePayload(kind: .todo, text: "明天上午十点整理读书笔记", polish: false, date: date.addingTimeInterval(-300)), accepted: true),
+                Delivery(id: "screenshot-todo-2", hash: Pairing.hash(code!), payload: CapturePayload(kind: .todo, text: "周末给阳台的植物浇水", polish: false, date: date.addingTimeInterval(-600)), accepted: true)
+            ]
+        }
+        #endif
     }
     private func persist() throws {
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)

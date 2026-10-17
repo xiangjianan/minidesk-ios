@@ -30,6 +30,11 @@ struct RootView: View {
             guard !selectedInitialTab else { return }
             selectedInitialTab = true
             selectedTab = store.isPaired ? .capture : .desktop
+            #if DEBUG && targetEnvironment(simulator)
+            if ProcessInfo.processInfo.environment["MINIDESK_SCREENSHOT_SCENE"] == "history" {
+                selectedTab = .history
+            }
+            #endif
         }
         .onChange(of: store.isPaired) { _, paired in
             selectedTab = paired ? .capture : .desktop
@@ -73,6 +78,7 @@ struct CaptureView: View {
     @State private var showsSendSuccess = false
     @State private var successFeedbackID = 0
     @State private var showsPasteError = false
+    @State private var showsAIConsent = false
     @State private var pasteErrorID = 0
     @State private var clearedDraft: String?
     @State private var clearUndoDeadline: Date?
@@ -140,7 +146,10 @@ struct CaptureView: View {
         .toolbar {
             if store.isPaired {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { store.polish.toggle() } label: {
+                    Button {
+                        if store.polish { store.polish = false }
+                        else { showsAIConsent = true }
+                    } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "sparkles")
                                 .foregroundStyle(store.polish
@@ -164,6 +173,12 @@ struct CaptureView: View {
                 }
                 .sharedBackgroundVisibility(.hidden)
             }
+        }
+        .alert("开启 AI 润色？", isPresented: $showsAIConsent) {
+            Button("取消", role: .cancel) {}
+            Button("同意并开启") { store.polish = true }
+        } message: {
+            Text("发送的文本将交给 DeepSeek 整理。其隐私政策允许在相应安全处理后，将输入和输出用于模型训练或服务优化。请勿发送敏感信息；关闭 AI 仍可发送原文。完整说明见配对页的隐私政策。")
         }
         .onChange(of: store.isPaired) { _, paired in
             if !paired {
@@ -485,6 +500,7 @@ struct DesktopView: View {
                 DisclosureGroup("数据与隐私") {
                     Text("配对码保存在本机钥匙串，草稿和历史记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；开启 AI 润色后，内容会交给服务端模型处理。")
                         .font(.footnote).foregroundStyle(.secondary)
+                    Link("隐私政策", destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
                 }
             }
         }.navigationTitle("配对")

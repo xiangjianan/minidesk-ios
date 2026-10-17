@@ -82,4 +82,4 @@ xcodebuild -project MiniDesk.xcodeproj -scheme MiniDesk \
 
 **当前协议不是端到端加密**：中转服务可读取消息，AI 开启后服务端模型会处理内容。本 App 不包含广告、分析 SDK 或跟踪。附带 PrivacyInfo.xcprivacy；上架前还需由服务运营者确认服务实际数据留存与 App Store 隐私问卷，并提供正式隐私政策。
 
-本项目未配置开发者签名、TestFlight 或 App Store 发布。
+已配置自动签名并上传 App Store Connect 构建 `1.0.0 (2)`，尚未提交审核或正式上架。当前进展及待办见 [App Store 发布检查](docs/app-store-readiness.md)，正式[隐私政策](https://xiangjianan.github.io/minidesk-ios/)已公开。

@@ -82,4 +82,4 @@ Pairing codes use the Keychain accessibility attribute `kSecAttrAccessibleWhenUn
 
 **The current protocol is not end-to-end encrypted**: the relay can read messages, and the server-side model processes content when AI is enabled. This app contains no ads, analytics SDKs, or tracking. A PrivacyInfo.xcprivacy file is included. Before release, the service operator must confirm actual data retention and App Store privacy questionnaire answers, and provide a formal privacy policy.
 
-Developer signing, TestFlight, and App Store distribution are not configured for this project.
+Automatic signing is configured, and build `1.0.0 (2)` has been uploaded to App Store Connect. The app has not been submitted for review or released. See the [release checklist](docs/app-store-readiness.md) for current status and remaining work. The [privacy policy](https://xiangjianan.github.io/minidesk-ios/) is public.

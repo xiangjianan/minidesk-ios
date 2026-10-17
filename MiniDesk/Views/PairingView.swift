@@ -46,6 +46,8 @@ struct PairingView: View {
                             Text(error).foregroundStyle(.red).font(.subheadline)
                         }
                     }
+                    Link("隐私政策", destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
+                        .font(.footnote)
                 }.padding(24)
             }
                 .scrollDismissesKeyboard(.interactively)

@@ -19,7 +19,7 @@ struct ShakeUndoTextEditor: UIViewRepresentable {
         view.keyboardDismissMode = .interactive
         view.alwaysBounceVertical = true
         view.textContainerInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
-        view.accessibilityLabel = "速记内容"
+        view.accessibilityLabel = L("速记内容")
         return view
     }
 
@@ -67,9 +67,9 @@ final class ShakeUndoTextView: UITextView {
         while let current = responder, !(current is UIViewController) { responder = current.next }
         guard let controller = responder as? UIViewController,
               controller.presentedViewController == nil else { return }
-        let alert = UIAlertController(title: "撤销输入？", message: nil, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
-        alert.addAction(UIAlertAction(title: "撤销", style: .default) { [weak self] _ in
+        let alert = UIAlertController(title: L("撤销输入？"), message: nil, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("取消"), style: .cancel))
+        alert.addAction(UIAlertAction(title: L("撤销"), style: .default) { [weak self] _ in
             guard let self, let previous = self.history.undo() else { return }
             self.text = previous
             self.selectedRange = NSRange(location: (previous as NSString).length, length: 0)

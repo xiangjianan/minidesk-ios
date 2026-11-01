@@ -59,7 +59,7 @@ struct Delivery: Identifiable, Codable {
         do {
             try await client.check(hash: Pairing.hash(normalized))
             try PairingKeychain.save(normalized); code = normalized; needsPairing = false
-            message = "桌面配对成功"
+            message = L("桌面配对成功")
         } catch { self.error = error.localizedDescription }
     }
     func unpair() { PairingKeychain.clear(); code = nil; needsPairing = false }
@@ -75,7 +75,7 @@ struct Delivery: Identifiable, Codable {
         // Save IDs before networking so uncertain requests can be retried with the same ID.
         do { try persist() } catch {
             records.removeAll { record in entries.contains { $0.id == record.id } }
-            self.error = "无法保存发送记录，草稿已保留。"; return
+            self.error = L("无法保存发送记录，草稿已保留。"); return
         }
         draft = ""
         var count = 0
@@ -90,7 +90,7 @@ struct Delivery: Identifiable, Codable {
         do {
             try await client.send(hash: entry.hash, item: InboxRequest(id: entry.id, payload: entry.payload))
             if let index = records.firstIndex(where: { $0.id == id }) { records[index].accepted = true; records[index].error = nil }
-            do { try persist() } catch { self.error = "中转已接收，但本机记录保存失败。" }
+            do { try persist() } catch { self.error = L("中转已接收，但本机记录保存失败。") }
             return true
         } catch {
             self.error = error.localizedDescription
@@ -102,15 +102,15 @@ struct Delivery: Identifiable, Codable {
     func retry(_ id: String) async {
         guard !busy, let code, let record = records.first(where: { $0.id == id }), record.hash == Pairing.hash(code) else { return }
         busy = true; defer { busy = false }; error = nil
-        if await deliver(id) { message = "中转已接收，等待桌面同步。" }
+        if await deliver(id) { message = L("中转已接收，等待桌面同步。") }
     }
     func canRetry(_ record: Delivery) -> Bool { !record.accepted && code.map { Pairing.hash($0) == record.hash } == true }
     func discard(_ id: String) {
         let previous = records; records.removeAll { $0.id == id }
-        do { try persist() } catch { records = previous; self.error = "无法删除记录，请稍后重试。" }
+        do { try persist() } catch { records = previous; self.error = L("无法删除记录，请稍后重试。") }
     }
     func clearAccepted() {
         let previous = records; records.removeAll { $0.accepted }
-        do { try persist() } catch { records = previous; self.error = "无法清除记录，请稍后重试。" }
+        do { try persist() } catch { records = previous; self.error = L("无法清除记录，请稍后重试。") }
     }
 }

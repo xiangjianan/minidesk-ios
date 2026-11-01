@@ -12,13 +12,13 @@ struct RootView: View {
         Group {
             if store.isPaired {
                 TabView(selection: $selectedTab) {
-                    Tab("配对", systemImage: "desktopcomputer", value: DeskTab.desktop) {
+                    Tab(L("配对"), systemImage: "desktopcomputer", value: DeskTab.desktop) {
                         NavigationStack { DesktopView(showPairing: $pairingSheet) }
                     }
-                    Tab("速记", systemImage: "square.and.pencil", value: DeskTab.capture) {
+                    Tab(L("速记"), systemImage: "square.and.pencil", value: DeskTab.capture) {
                         NavigationStack { CaptureView(showPairing: $pairingSheet) }
                     }
-                    Tab("历史", systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
+                    Tab(L("历史"), systemImage: "clock.arrow.circlepath", value: DeskTab.history) {
                         NavigationStack { HistoryView() }
                     }
                 }
@@ -86,7 +86,7 @@ struct CaptureView: View {
         @Bindable var store = store
         VStack(spacing: 0) {
             if store.isPaired {
-                Picker("发送类型", selection: $store.kind) {
+                Picker(L("发送类型"), selection: $store.kind) {
                     ForEach(CaptureKind.allCases, id: \.self) { kind in
                         Label(kind.title, systemImage: kind.symbol).tag(kind)
                     }
@@ -98,7 +98,7 @@ struct CaptureView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.horizontal, 20)
                     if store.draft.isEmpty && !showsSendSuccess {
-                        Text(store.kind == .todo ? "写下要做的事…" : "记下此刻的想法…")
+                        Text(store.kind == .todo ? L("写下要做的事…") : L("记下此刻的想法…"))
                             .font(.body).foregroundStyle(.tertiary)
                             .padding(.horizontal, 25).padding(.top, 8)
                             .allowsHitTesting(false)
@@ -107,7 +107,7 @@ struct CaptureView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay(alignment: .top) {
                     if showsSendSuccess {
-                        SuccessNotice(text: "消息已发送", symbol: "checkmark.circle.fill")
+                        SuccessNotice(text: L("消息已发送"), symbol: "checkmark.circle.fill")
                             .padding(.top, 8)
                             .transition(.opacity)
                     }
@@ -129,11 +129,11 @@ struct CaptureView: View {
                 )
             } else {
                 ContentUnavailableView {
-                    Label(store.needsPairing ? "需要重新配对" : "配对后才能使用速记", systemImage: "lock.fill")
+                    Label(store.needsPairing ? L("需要重新配对") : L("配对后才能使用速记"), systemImage: "lock.fill")
                 } description: {
-                    Text(store.needsPairing ? "当前配对已失效，请重新连接桌面端。" : "先连接电脑上的 MiniDesk，再输入并发送提醒或随手记。")
+                    Text(store.needsPairing ? L("当前配对已失效，请重新连接桌面端。") : L("先连接电脑上的 MiniDesk，再输入并发送提醒或随手记。"))
                 } actions: {
-                    Button(store.needsPairing ? "重新配对" : "立即配对") { showPairing = true }
+                    Button(store.needsPairing ? L("重新配对") : L("立即配对")) { showPairing = true }
                         .buttonStyle(.glassProminent)
                 }
             }
@@ -155,7 +155,7 @@ struct CaptureView: View {
                                 .foregroundStyle(store.polish
                                     ? AnyShapeStyle(LinearGradient(colors: [.pink, .purple, .blue, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
                                     : AnyShapeStyle(Color.secondary))
-                            Text("AI润色").foregroundStyle(store.polish ? Color.primary : Color.secondary)
+                            Text(L("AI润色")).foregroundStyle(store.polish ? Color.primary : Color.secondary)
                         }.font(.system(size: 12, weight: .medium))
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
@@ -166,19 +166,19 @@ struct CaptureView: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .disabled(store.busy).accessibilityLabel("AI 润色")
-                    .accessibilityValue(store.polish ? "已开启" : "已关闭")
+                    .disabled(store.busy).accessibilityLabel(L("AI 润色"))
+                    .accessibilityValue(store.polish ? L("已开启") : L("已关闭"))
                     .accessibilityAddTraits(store.polish ? [.isSelected] : [])
                     .sensoryFeedback(.impact(weight: .light, intensity: 0.85), trigger: store.polish)
                 }
                 .sharedBackgroundVisibility(.hidden)
             }
         }
-        .alert("开启 AI 润色？", isPresented: $showsAIConsent) {
-            Button("取消", role: .cancel) {}
-            Button("同意并开启") { store.polish = true }
+        .alert(L("开启 AI 润色？"), isPresented: $showsAIConsent) {
+            Button(L("取消"), role: .cancel) {}
+            Button(L("同意并开启")) { store.polish = true }
         } message: {
-            Text("发送的文本将交给 DeepSeek 整理。其隐私政策允许在相应安全处理后，将输入和输出用于模型训练或服务优化。请勿发送敏感信息；关闭 AI 仍可发送原文。完整说明见配对页的隐私政策。")
+            Text(L("发送的文本将交给 DeepSeek 整理。其隐私政策允许在相应安全处理后，将输入和输出用于模型训练或服务优化。请勿发送敏感信息；关闭 AI 仍可发送原文。完整说明见配对页的隐私政策。"))
         }
         .onChange(of: store.isPaired) { _, paired in
             if !paired {
@@ -229,7 +229,7 @@ struct CaptureView: View {
     private var editingTools: some View {
         VStack(alignment: .leading, spacing: 8) {
             if showsPasteError {
-                Text("剪贴板没有可粘贴的文本")
+                Text(L("剪贴板没有可粘贴的文本"))
                     .font(.caption).foregroundStyle(.red).transition(.opacity)
             }
             if let error = store.error {
@@ -243,21 +243,21 @@ struct CaptureView: View {
                             Button(action: clearDraft) {
                                 toolSurface(destructive: true) { Image(systemName: "trash") }
                             }.buttonStyle(.plain).allowsHitTesting(!store.busy)
-                                .accessibilityLabel("清空草稿")
+                                .accessibilityLabel(L("清空草稿"))
                         }
                         animatedTool(visible: clearedDraft != nil && store.draft.isEmpty) {
                             Button(action: restoreClearedDraft) {
                                 toolSurface { Image(systemName: "arrow.uturn.backward") }
                             }.buttonStyle(.plain).allowsHitTesting(!store.busy)
-                                .accessibilityLabel("撤销清空")
-                                .accessibilityHint("恢复刚刚清空的文本")
+                                .accessibilityLabel(L("撤销清空"))
+                                .accessibilityHint(L("恢复刚刚清空的文本"))
                         }
                     }.frame(width: 58, height: 48)
                     Spacer(minLength: 8)
                     animatedTool(visible: hasClipboardText) {
                         Button(action: pasteDraft) {
                             toolSurface { Image(systemName: "doc.on.clipboard") }
-                        }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel("粘贴文本")
+                        }.buttonStyle(.plain).disabled(store.busy).accessibilityLabel(L("粘贴文本"))
                     }
                     animatedTool(visible: !store.draft.isEmpty) {
                         Button(action: sendDraft) {
@@ -269,15 +269,15 @@ struct CaptureView: View {
                             }
                         }.buttonStyle(.plain).allowsHitTesting(canSend)
                             .opacity(canSend || store.busy ? 1 : 0.4)
-                            .accessibilityLabel(store.busy ? "正在发送" : "发送到桌面")
-                            .accessibilityHint("收起键盘并发送当前内容")
+                            .accessibilityLabel(store.busy ? L("正在发送") : L("发送到桌面"))
+                            .accessibilityHint(L("收起键盘并发送当前内容"))
                     }
                 }
                 .overlay(alignment: .center) {
                     animatedTool(visible: editing) {
                         Button(action: dismissKeyboard) {
                             toolSurface { Image(systemName: "keyboard.chevron.compact.down") }
-                        }.buttonStyle(.plain).accessibilityLabel("收起键盘")
+                        }.buttonStyle(.plain).accessibilityLabel(L("收起键盘"))
                     }
                 }
             }
@@ -370,34 +370,34 @@ struct HistoryView: View {
     var body: some View {
         List {
             Section {
-                Text("“已接收”表示中转服务已接收，不代表桌面端已同步。失败的记录可在原配对桌面下重试。")
+                Text(L("“已接收”表示中转服务已接收，不代表桌面端已同步。失败的记录可在原配对桌面下重试。"))
                     .font(.footnote).foregroundStyle(.secondary)
             }
             if store.records.isEmpty {
-                ContentUnavailableView("还没有发送记录", systemImage: "tray", description: Text("写下第一条提醒或想法，它会出现在这里。"))
+                ContentUnavailableView(L("还没有发送记录"), systemImage: "tray", description: Text(L("写下第一条提醒或想法，它会出现在这里。")))
             }
             ForEach(store.records) { record in
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Label(record.payload.kind.title, systemImage: record.payload.kind.symbol).font(.caption).foregroundStyle(.secondary)
                         Spacer()
-                        Text(record.accepted ? "中转已接收" : "待重试").font(.caption).foregroundStyle(record.accepted ? .green : .orange)
+                        Text(record.accepted ? L("中转已接收") : L("待重试")).font(.caption).foregroundStyle(record.accepted ? .green : .orange)
                     }
                     Text(record.payload.text)
                         .lineLimit(nil)
                         .multilineTextAlignment(.leading)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack {
-                        Text(record.date, formatter: Self.recordDateFormatter).font(.caption).foregroundStyle(.secondary)
+                        Text(record.date, format: .dateTime.year().month().day().hour().minute()).font(.caption).foregroundStyle(.secondary)
                         Spacer()
                         if store.canRetry(record) {
-                            Button("重试", systemImage: "arrow.clockwise") { Task { await store.retry(record.id) } }
+                            Button(L("重试"), systemImage: "arrow.clockwise") { Task { await store.retry(record.id) } }
                                 .buttonStyle(.glass).disabled(store.busy)
                         }
                     }
                     if let error = record.error { Text(error).font(.caption).foregroundStyle(.red) }
                     if !record.accepted && !store.canRetry(record) {
-                        Text("请连接发送时的桌面后重试。") .font(.caption).foregroundStyle(.secondary)
+                        Text(L("请连接发送时的桌面后重试。")) .font(.caption).foregroundStyle(.secondary)
                     }
                 }.padding(.vertical, 6)
                     .contentShape(Rectangle())
@@ -405,36 +405,30 @@ struct HistoryView: View {
                         UIPasteboard.general.string = record.payload.text
                         copyFeedbackID += 1
                     }
-                    .accessibilityHint("轻点复制内容")
+                    .accessibilityHint(L("轻点复制内容"))
                     .accessibilityAddTraits(.isButton)
                     .swipeActions {
-                        Button("删除", role: .destructive) { store.discard(record.id) }
+                        Button(L("删除"), role: .destructive) { store.discard(record.id) }
                             .tint(.red).disabled(store.busy)
                     }
             }
         }
-        .navigationTitle("发送记录")
+        .navigationTitle(L("发送记录"))
         .modifier(CopyFeedback(trigger: copyFeedbackID))
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("清除已接收", systemImage: "trash") { confirmClear = true }.tint(.red)
+                Button(L("清除已接收"), systemImage: "trash") { confirmClear = true }.tint(.red)
                     .disabled(store.busy || !store.records.contains { $0.accepted })
             }
         }
-        .alert("删除已接收的发送记录？", isPresented: $confirmClear) {
-            Button("取消", role: .cancel) {}
-            Button("删除", role: .destructive) { store.clearAccepted() }
+        .alert(L("删除已接收的发送记录？"), isPresented: $confirmClear) {
+            Button(L("取消"), role: .cancel) {}
+            Button(L("删除"), role: .destructive) { store.clearAccepted() }
         } message: {
-            Text("将删除本机所有已接收的记录。待重试的内容会保留。")
+            Text(L("将删除本机所有已接收的记录。待重试的内容会保留。"))
         }
     }
-    private static let recordDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.dateFormat = "yyyy年M月d日 HH:mm"
-        return formatter
-    }()
+
 
 }
 
@@ -442,6 +436,7 @@ struct DesktopView: View {
     @Environment(DeskStore.self) private var store
     @Binding var showPairing: Bool
     @State private var disconnect = false
+    @AppStorage(AppLanguage.key) private var language = "system"
     @State private var copyFeedbackID = 0
     @State private var copiedAddress: String?
     var body: some View {
@@ -452,12 +447,12 @@ struct DesktopView: View {
                         .font(.system(size: 38, weight: .light)).foregroundStyle(.tint)
                         .frame(width: 76, height: 76)
                         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 22))
-                    Text("桌面已配对").font(.title2.bold())
-                    Text("可发送提醒事项和随手记")
+                    Text(L("桌面已配对")).font(.title2.bold())
+                    Text(L("可发送提醒事项和随手记"))
                         .font(.subheadline).foregroundStyle(.secondary)
                 }.frame(maxWidth: .infinity).padding(.vertical, 16)
             }.listRowBackground(Color.clear)
-            Section("配对管理") {
+            Section(L("配对管理")) {
                 if let code = store.code {
                     Button {
                         UIPasteboard.general.string = code
@@ -465,52 +460,55 @@ struct DesktopView: View {
                         copyFeedbackID += 1
                     } label: {
                         HStack {
-                            Text("配对码").foregroundStyle(.primary)
+                            Text(L("配对码")).foregroundStyle(.primary)
                             Spacer()
                             Text(Pairing.masked(code))
                                 .font(.system(.subheadline, design: .monospaced))
                                 .foregroundStyle(.secondary)
                             Image(systemName: "doc.on.doc").font(.subheadline)
                         }
-                    }.accessibilityHint("轻点复制完整配对码")
+                    }.accessibilityHint(L("轻点复制完整配对码"))
                 }
-                Button("更换配对", systemImage: "arrow.triangle.2.circlepath") {
+                Button(L("更换配对"), systemImage: "arrow.triangle.2.circlepath") {
                     showPairing = true
                 }.disabled(store.busy)
                 Button(role: .destructive) {
                     disconnect = true
                 } label: {
-                    Label("断开配对", systemImage: "xmark.circle")
+                    Label(L("断开配对"), systemImage: "xmark.circle")
                         .foregroundStyle(.red)
                 }.tint(.red).disabled(store.busy)
             }
             Section {
-                Button("复制桌面端地址", systemImage: "doc.on.clipboard") {
+                Button(L("复制桌面端地址"), systemImage: "doc.on.clipboard") {
                     let address = "https://minidesk.online"
                     UIPasteboard.general.string = address
                     copiedAddress = address
                     copyFeedbackID += 1
                 }
             } header: {
-                Text("桌面端")
+                Text(L("桌面端"))
             } footer: {
-                Text("在电脑浏览器打开 minidesk.online。")
+                Text(L("在电脑浏览器打开 minidesk.online。"))
+            }
+            Section(L("设置")) {
+                LanguagePicker(selection: $language)
             }
             Section {
-                DisclosureGroup("数据与隐私") {
-                    Text("配对码保存在本机钥匙串，草稿和历史记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；开启 AI 润色后，内容会交给服务端模型处理。")
+                DisclosureGroup(L("数据与隐私")) {
+                    Text(L("配对码保存在本机钥匙串，草稿和历史记录保存在本机。消息通过 HTTPS 发送，中转服务可读取内容；开启 AI 润色后，内容会交给服务端模型处理。"))
                         .font(.footnote).foregroundStyle(.secondary)
-                    Link("隐私政策", destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
+                    Link(L("隐私政策"), destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
                 }
             }
-        }.navigationTitle("配对")
+        }.navigationTitle(L("配对"))
             .scrollIndicators(.hidden)
             .modifier(CopyFeedback(trigger: copyFeedbackID, detail: copiedAddress))
-            .alert("断开本机配对？", isPresented: $disconnect) {
-                Button("取消", role: .cancel) {}
-                Button("断开配对", role: .destructive) { store.unpair() }
+            .alert(L("断开本机配对？"), isPresented: $disconnect) {
+                Button(L("取消"), role: .cancel) {}
+                Button(L("断开配对"), role: .destructive) { store.unpair() }
             } message: {
-                Text("只移除本机的配对信息，桌面端配对码仍然有效。")
+                Text(L("只移除本机的配对信息，桌面端配对码仍然有效。"))
             }
     }
 }
@@ -550,7 +548,7 @@ struct CopyFeedback: ViewModifier {
         content
             .overlay(alignment: .top) {
                 if visible {
-                    SuccessNotice(text: detail == nil ? "文本已复制到剪贴板" : "已复制到剪贴板", symbol: "checkmark.circle.fill", detail: detail)
+                    SuccessNotice(text: detail == nil ? L("文本已复制到剪贴板") : L("已复制到剪贴板"), symbol: "checkmark.circle.fill", detail: detail)
                         .padding(.top, 8).transition(.opacity)
                 }
             }
@@ -572,3 +570,14 @@ struct CopyFeedback: ViewModifier {
 }
 
 #Preview { RootView().environment(DeskStore()) }
+
+struct LanguagePicker: View {
+    @Binding var selection: String
+    var body: some View {
+        Picker(L("语言"), selection: $selection) {
+            Text(L("跟随系统")).tag("system")
+            Text("简体中文").tag("zh-Hans")
+            Text("English").tag("en")
+        }
+    }
+}

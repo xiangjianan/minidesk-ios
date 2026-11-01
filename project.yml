@@ -34,7 +34,7 @@ targets:
       path: MiniDesk/Info.plist
       properties:
         CFBundleDevelopmentRegion: zh-Hans
-        CFBundleLocalizations: [zh-Hans]
+        CFBundleLocalizations: [zh-Hans, en]
         ITSAppUsesNonExemptEncryption: false
         CFBundleURLTypes:
           - CFBundleURLName: online.minidesk.pairing

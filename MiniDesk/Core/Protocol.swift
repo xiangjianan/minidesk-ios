@@ -3,7 +3,7 @@ import CryptoKit
 
 public enum CaptureKind: String, Codable, CaseIterable, Sendable {
     case todo, note
-    public var title: String { self == .todo ? "提醒事项" : "随手记" }
+    public var title: String { self == .todo ? L("提醒事项") : L("随手记") }
     public var symbol: String { self == .todo ? "checkmark.circle" : "note.text" }
 }
 
@@ -54,16 +54,16 @@ public enum RelayError: Error, LocalizedError, Equatable {
     case invalidCode, revoked, unknown, rateLimited, full, tooLarge, invalidRequest, server, network, malformed
     public var errorDescription: String? {
         switch self {
-        case .invalidCode: "请输入桌面端显示的 12 位配对码。"
-        case .revoked: "配对码已注销，请在桌面端获取新的配对码。"
-        case .unknown: "配对码尚未注册，请先在桌面端打开手机速记配对。"
-        case .rateLimited: "发送太频繁，请稍后重试。"
-        case .full: "桌面收件箱已满，请打开桌面端接收后重试。"
-        case .tooLarge: "内容太长，每条最多 500 个字符。"
-        case .invalidRequest: "发送内容格式有误。"
-        case .server: "中转服务暂时不可用，请稍后重试。"
-        case .network: "无法连接中转服务，请检查网络后重试。"
-        case .malformed: "中转服务返回了无法识别的数据。"
+        case .invalidCode: L("请输入桌面端显示的 12 位配对码。")
+        case .revoked: L("配对码已注销，请在桌面端获取新的配对码。")
+        case .unknown: L("配对码尚未注册，请先在桌面端打开手机速记配对。")
+        case .rateLimited: L("发送太频繁，请稍后重试。")
+        case .full: L("桌面收件箱已满，请打开桌面端接收后重试。")
+        case .tooLarge: L("内容太长，每条最多 500 个字符。")
+        case .invalidRequest: L("发送内容格式有误。")
+        case .server: L("中转服务暂时不可用，请稍后重试。")
+        case .network: L("无法连接中转服务，请检查网络后重试。")
+        case .malformed: L("中转服务返回了无法识别的数据。")
         }
     }
     public static func status(_ status: Int) -> RelayError {

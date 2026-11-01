@@ -6,6 +6,7 @@ struct PairingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.importedPairingCode) private var imported
     @State private var input = ""
+    @AppStorage(AppLanguage.key) private var language = "system"
     @State private var scanning = false
     @State private var copyFeedbackID = 0
     private let desktopAddress = "https://minidesk.online"
@@ -13,20 +14,20 @@ struct PairingView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("连接你的电脑").font(.title2.bold())
-                    pairingStep(1, title: "电脑：打开 MiniDesk", description: "在电脑浏览器访问 minidesk.online。") {
+                    Text(L("连接你的电脑")).font(.title2.bold())
+                    pairingStep(1, title: L("电脑：打开 MiniDesk"), description: L("在电脑浏览器访问 minidesk.online。")) {
                         Button {
                             UIPasteboard.general.string = desktopAddress
                             copyFeedbackID += 1
                         } label: {
-                            Label("复制桌面端地址", systemImage: "doc.on.clipboard")
+                            Label(L("复制桌面端地址"), systemImage: "doc.on.clipboard")
                                 .frame(maxWidth: .infinity)
                         }.buttonStyle(.glass).controlSize(.large)
                     }
-                    pairingStep(2, title: "电脑：获取配对码", description: "工作区菜单 →「手机速记」。") {}
-                    pairingStep(3, title: "手机：连接电脑", description: "扫码或输入配对码，也可粘贴配对链接。") {
+                    pairingStep(2, title: L("电脑：获取配对码"), description: L("工作区菜单 →「手机速记」。")) {}
+                    pairingStep(3, title: L("手机：连接电脑"), description: L("扫码或输入配对码，也可粘贴配对链接。")) {
                         Button { scanning = true } label: {
-                            Label("扫描桌面二维码", systemImage: "qrcode.viewfinder")
+                            Label(L("扫描桌面二维码"), systemImage: "qrcode.viewfinder")
                                 .frame(maxWidth: .infinity)
                         }.buttonStyle(.glass).controlSize(.large).disabled(store.busy)
                         PairingCodeField(input: $input).disabled(store.busy)
@@ -38,7 +39,7 @@ struct PairingView: View {
                         } label: {
                             HStack {
                                 if store.busy { ProgressView() }
-                                Text(store.busy ? "验证中…" : "连接桌面")
+                                Text(store.busy ? L("验证中…") : L("连接桌面"))
                             }.frame(maxWidth: .infinity)
                         }.buttonStyle(.glassProminent).controlSize(.large)
                             .disabled(store.busy || !Pairing.isValid(Pairing.normalize(input)))
@@ -46,17 +47,18 @@ struct PairingView: View {
                             Text(error).foregroundStyle(.red).font(.subheadline)
                         }
                     }
-                    Link("隐私政策", destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
+                    LanguagePicker(selection: $language)
+                    Link(L("隐私政策"), destination: URL(string: "https://xiangjianan.github.io/minidesk-ios/")!)
                         .font(.footnote)
                 }.padding(24)
             }
                 .scrollDismissesKeyboard(.interactively)
                 .scrollBounceBehavior(.always)
                 .background { DeskBackdrop() }
-                .navigationTitle(required ? "MiniDesk" : "配对桌面").navigationBarTitleDisplayMode(.inline)
+                .navigationTitle(required ? "MiniDesk" : L("配对桌面")).navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     if !required {
-                        ToolbarItem(placement: .cancellationAction) { Button("关闭") { dismiss() }.disabled(store.busy) }
+                        ToolbarItem(placement: .cancellationAction) { Button(L("关闭")) { dismiss() }.disabled(store.busy) }
                     }
                 }
         }
@@ -69,7 +71,7 @@ struct PairingView: View {
         .sheet(isPresented: $scanning) {
             QRScannerView { value in
                 let normalized = Pairing.normalize(value)
-                guard Pairing.isValid(normalized) else { store.error = "二维码不是有效的 MiniDesk 配对链接。"; scanning = false; return }
+                guard Pairing.isValid(normalized) else { store.error = L("二维码不是有效的 MiniDesk 配对链接。"); scanning = false; return }
                 input = normalized; scanning = false
             }
         }
@@ -83,7 +85,7 @@ struct PairingView: View {
                     .foregroundStyle(Color.accentColor)
                     .frame(width: 28, height: 28)
                     .background(Color.accentColor.opacity(0.12), in: Circle())
-                    .accessibilityLabel("第 \(number) 步")
+                    .accessibilityLabel(AppLanguage.identifier == "en" ? "Step \(number)" : "第 \(number) 步")
                 Text(title).font(.headline)
             }
             Text(description).font(.subheadline).foregroundStyle(.secondary)
@@ -133,7 +135,7 @@ private struct PairingCodeField: View {
                     }
                 }.allowsHitTesting(false).accessibilityHidden(true)
             }
-            .accessibilityLabel("12 位配对码，也可粘贴配对链接")
+            .accessibilityLabel(L("12 位配对码，也可粘贴配对链接"))
             .accessibilityValue(Pairing.normalize(input))
             .onChange(of: input) { _, value in
                 let normalized = String(Pairing.normalize(value).replacingOccurrences(of: "-", with: "").prefix(12))

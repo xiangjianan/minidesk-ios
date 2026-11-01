@@ -7,8 +7,8 @@ struct QRScannerView: View {
     var body: some View {
         NavigationStack {
             ScannerRepresentable(onCode: onCode).ignoresSafeArea(edges: .bottom)
-                .navigationTitle("扫描配对二维码").navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .cancellationAction) { Button("取消") { dismiss() } } }
+                .navigationTitle(L("扫描配对二维码")).navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .cancellationAction) { Button(L("取消")) { dismiss() } } }
         }
     }
 }
@@ -31,7 +31,7 @@ private final class ScannerController: UIViewController, AVCaptureMetadataOutput
     required init?(coder: NSCoder) { fatalError("init(coder:) unavailable") }
     override func viewDidLoad() {
         super.viewDidLoad(); view.backgroundColor = .black
-        hint.text = "将桌面端二维码放入画面中"; hint.textColor = .white; hint.numberOfLines = 0; hint.textAlignment = .center
+        hint.text = L("将桌面端二维码放入画面中"); hint.textColor = .white; hint.numberOfLines = 0; hint.textAlignment = .center
         hint.translatesAutoresizingMaskIntoConstraints = false; view.addSubview(hint)
         NSLayoutConstraint.activate([hint.centerXAnchor.constraint(equalTo: view.centerXAnchor), hint.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24), hint.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40)])
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -43,12 +43,12 @@ private final class ScannerController: UIViewController, AVCaptureMetadataOutput
         default: showDenied()
         }
     }
-    private func showDenied() { hint.text = "无法使用相机。请在系统设置中允许相机权限，或关闭此页面手动输入配对码。" }
+    private func showDenied() { hint.text = L("无法使用相机。请在系统设置中允许相机权限，或关闭此页面手动输入配对码。") }
     private func configure() {
-        guard !completed, let device = AVCaptureDevice.default(for: .video), let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else { hint.text = "此设备无法使用相机，请手动输入配对码。"; return }
+        guard !completed, let device = AVCaptureDevice.default(for: .video), let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) else { hint.text = L("此设备无法使用相机，请手动输入配对码。"); return }
         session.beginConfiguration(); session.addInput(input)
         let output = AVCaptureMetadataOutput()
-        guard session.canAddOutput(output) else { session.commitConfiguration(); hint.text = "无法启动扫码，请手动输入配对码。"; return }
+        guard session.canAddOutput(output) else { session.commitConfiguration(); hint.text = L("无法启动扫码，请手动输入配对码。"); return }
         session.addOutput(output); output.setMetadataObjectsDelegate(self, queue: .main); output.metadataObjectTypes = [.qr]; session.commitConfiguration()
         let layer = AVCaptureVideoPreviewLayer(session: session); layer.videoGravity = .resizeAspectFill
         view.layer.insertSublayer(layer, at: 0); preview = layer; layer.frame = view.bounds
